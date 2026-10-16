@@ -1376,6 +1376,7 @@ function fermerCarrouselMusique() {
 ========================================================= */
 
 let connaissances = null;
+let chargementConnaissances = null;
 let reconnaissance = null;
 let reconnaissanceActive = false;
 
@@ -1613,37 +1614,36 @@ function signalerInteraction() {
 
 async function chargerConnaissances() {
 
-  try {
+  // Un seul chargement partagé : évite qu'une question arrive
+  // avant la fin du fetch, notamment sur une tablette plus lente.
+  if (connaissances) return connaissances;
+  if (chargementConnaissances) return chargementConnaissances;
 
-    const reponse =
-      await fetch(
-        "connaissances.json?cache=" +
-        Date.now()
-      );
+  chargementConnaissances = (async () => {
+    try {
+      const reponse = await fetch("connaissances.json?cache=" + Date.now());
 
-    if (!reponse.ok) {
-      throw new Error(
-        "Impossible de charger connaissances.json"
-      );
+      if (!reponse.ok) {
+        throw new Error("Impossible de charger connaissances.json (HTTP " + reponse.status + ")");
+      }
+
+      const base = await reponse.json();
+      if (!base || !Array.isArray(base.reponses)) {
+        throw new Error("Le fichier connaissances.json n'a pas le format attendu.");
+      }
+
+      connaissances = base;
+      console.log("✅ Base de connaissances chargée :", connaissances.reponses.length, "réponses");
+      return connaissances;
+    } catch (erreur) {
+      console.error("❌ Erreur connaissances.json :", erreur);
+      etat.textContent = "⚠️ Base de connaissances indisponible. Vérifiez que connaissances.json est bien publié à côté de index.html.";
+      chargementConnaissances = null;
+      return null;
     }
+  })();
 
-    connaissances =
-      await reponse.json();
-
-    console.log(
-      "✅ Base de connaissances chargée"
-    );
-
-  } catch (erreur) {
-
-    console.error(
-      "❌ Erreur connaissances.json :",
-      erreur
-    );
-
-    etat.textContent =
-      "⚠️ Impossible de charger les connaissances.";
-  }
+  return chargementConnaissances;
 }
 
 
@@ -5227,6 +5227,20 @@ async function traiterQuestion(
   question,
   source = "jaune"
 ) {
+
+  if (traitementQuestion || audioLectureEnCours) {
+    return;
+  }
+
+  // Attendre le chargement réel de la base avant toute recherche.
+  if (!connaissances) {
+    etat.textContent = "⏳ Chargement des réponses de Sophia...";
+    const baseChargee = await chargerConnaissances();
+    if (!baseChargee) {
+      etat.textContent = "⚠️ Je ne peux pas rechercher la réponse : vérifiez le fichier connaissances.json sur GitHub.";
+      return;
+    }
+  }
 
   if (traitementQuestion || audioLectureEnCours) {
     return;
