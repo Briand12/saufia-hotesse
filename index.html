@@ -1,0 +1,6242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hôtesse de Château-Thierry</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: Arial, sans-serif;
+}
+
+#avatar {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+}
+
+#avatar > #imageAvatar,
+#avatar > #videoAvatar {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: translate(-50%, -50%) scale(.90);
+  transform-origin: center center;
+  display: block;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: opacity .6s ease;
+}
+
+#imageAvatar {
+  z-index: 2;
+  opacity: 1;
+}
+
+#videoAvatar {
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: transparent;
+  pointer-events: none;
+}
+
+#micro {
+  position: fixed;
+  right: 10px;
+  bottom: 25px;
+  z-index: 20;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#micro img {
+  display: block;
+  width: 180px;
+  height: auto;
+  border: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+#micro:active {
+  transform: scale(.96);
+}
+
+#themesContainer {
+  position: fixed;
+  left: 10px;
+  bottom: 25px;
+  z-index: 40;
+}
+
+#boutonThemes {
+  display: block;
+  width: 160px;
+  height: auto;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: transform .2s ease;
+}
+
+#boutonThemes:hover {
+  transform: scale(1.04);
+}
+
+#boutonThemes:active {
+  transform: scale(.96);
+}
+
+/* Commandes visibles du carrousel, juste au-dessus du bouton violet */
+#servicesCommandes {
+  display: none;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 9px;
+}
+
+#servicesCommandes.actif {
+  display: flex;
+}
+
+.servicesCommande {
+  width: 160px;
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 12px;
+  background: rgba(20,20,20,.92);
+  color: #fff;
+  font-size: 15px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,.55);
+  transition: transform .15s ease, background .15s ease;
+}
+
+.servicesCommande:hover {
+  background: rgba(55,55,55,.96);
+  transform: scale(1.03);
+}
+
+.servicesCommande:active {
+  transform: scale(.96);
+}
+
+#themesMenu {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 10px;
+  width: min(360px,78vw);
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 8px;
+  background: rgba(20,20,20,.96);
+  border: 1px solid rgba(255,255,255,.20);
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.65);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity .2s ease,
+              transform .2s ease,
+              visibility .2s ease;
+}
+
+#themesMenu.ouvert {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.themeItem {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  margin: 3px 0;
+  border: none;
+  border-radius: 9px;
+  background: rgba(255,255,255,.10);
+  color: white;
+  text-align: left;
+  font-size: 15px;
+  font-family: Arial,sans-serif;
+  cursor: pointer;
+}
+
+.themeItem:hover {
+  background: rgba(255,255,255,.20);
+}
+
+.themeParent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fleche {
+  font-size: 13px;
+  margin-left: 10px;
+  transition: transform .2s ease;
+}
+
+.themeParent.ouvert .fleche {
+  transform: rotate(180deg);
+}
+
+.submenu {
+  display: none;
+  margin: 4px 0 6px 12px;
+  padding-left: 8px;
+  border-left: 2px solid rgba(255,255,255,.20);
+}
+
+.submenu.ouvert {
+  display: block;
+}
+
+.submenu .themeItem {
+  font-size: 14px;
+  background: rgba(255,255,255,.07);
+}
+
+#etat {
+  position: fixed;
+  left: 50%;
+  bottom: 5px;
+  transform: translateX(-50%);
+  z-index: 30;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+  text-shadow: 0 1px 3px #000,0 0 5px #000;
+  pointer-events: none;
+}
+
+#texte {
+  position: fixed;
+  left: -9999px;
+  top: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+/* =========================
+   CARROUSEL 3D SERVICES
+========================= */
+#servicesCarousel {
+  position: fixed;
+  left: 0;
+  top: 11vh;
+  width: min(360px, 34vw);
+  height: min(300px, 34vh);
+  z-index: 50;
+  display: none;
+  perspective: 900px;
+  pointer-events: none;
+}
+
+#servicesCarousel.actif {
+  display: block;
+}
+
+.servicesScene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.servicesCarte {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44%;
+  height: 70%;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #111;
+  border: 2px solid rgba(255,255,255,.85);
+  box-shadow: 0 8px 25px rgba(0,0,0,.65);
+  backface-visibility: hidden;
+  transition: transform .65s ease, opacity .65s ease, filter .65s ease;
+}
+
+.servicesCarte img,
+.servicesCarte video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.servicesCarte img {
+  object-position: center 15%;
+}
+
+/* Images : position inchangée */
+.servicesCarte video {
+  object-position: center 15%;
+}
+
+/*
+   Vidéo du carrousel :
+   remontée uniquement à l'intérieur de la carte.
+   Les images ne bougent pas.
+*/
+.servicesCarte video.carrouselVideo {
+  position: relative;
+  top: -30px;
+  height: calc(100% + 30px);
+}
+
+.servicesNom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 7px 5px;
+  background: linear-gradient(transparent,rgba(0,0,0,.9));
+  color: #fff;
+  text-align: center;
+  font-size: clamp(11px,1.2vw,15px);
+  font-weight: bold;
+  text-shadow: 0 1px 3px #000;
+}
+
+.servicesTitre {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  top: -8px;
+  color: white;
+  text-align: center;
+  font-size: clamp(12px,1.5vw,17px);
+  font-weight: bold;
+  text-shadow: 0 2px 5px #000;
+  z-index: 10;
+}
+
+.servicesControle {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: rgba(0,0,0,.72);
+  color: white;
+  font-size: 11px;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px #000;
+}
+
+@media(max-width:600px) {
+  #servicesCarousel {
+    top: 12vh;
+    width: 48vw;
+    height: 30vh;
+  }
+
+  .servicesCarte video.carrouselVideo {
+    top: -20px;
+    height: calc(100% + 20px);
+  }
+}
+
+#imageSupplementaire {
+  position: fixed !important;
+  left: 0 !important;
+  top: 6vh !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 32vw !important;
+  height: 32vh !important;
+  max-width: 32vw;
+  max-height: 32vh;
+  object-fit: contain;
+  transform: none !important;
+  z-index: 4;
+  display: none;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.55);
+  pointer-events: none;
+  background: transparent;
+}
+
+#emailConfirmation {
+  position: fixed;
+  left: 3vw;
+  top: 12%;
+  z-index: 1100;
+  display: none;
+  max-width: 35vw;
+  padding: 12px 22px;
+  background: rgba(0,0,0,.82);
+  border: 2px solid rgba(255,255,255,.75);
+  border-radius: 12px;
+  color: white;
+  font-size: clamp(17px,2.2vw,28px);
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 0 2px 4px #000;
+  box-shadow: 0 5px 25px rgba(0,0,0,.65);
+  word-break: break-word;
+  pointer-events: none;
+}
+
+/* =========================
+   CLAVIER EMAIL
+========================= */
+
+#clavierEmail {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  display: none;
+  background: rgba(0,0,0,.45);
+  padding: 8px 10px 10px;
+  pointer-events: auto;
+}
+
+.clavierEmailBoite {
+  width: min(600px,82vw);
+  margin: 0 auto;
+  padding: 10px;
+  background: rgba(25,25,25,.98);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.65);
+  position: relative;
+}
+
+#champEmailClavier {
+  width: 100%;
+  padding: 9px 12px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 8px;
+  background: white;
+  color: #111;
+  font-size: 18px;
+  text-align: center;
+}
+
+.clavierEmailTouches {
+  display: grid;
+  grid-template-columns: repeat(10,1fr);
+  gap: 4px;
+}
+
+.clavierEmailTouches button,
+.clavierEmailActions button {
+  border: none;
+  border-radius: 7px;
+  padding: 7px 4px;
+  min-height: 36px;
+  font-size: 15px;
+  cursor: pointer;
+  background: #eee;
+  color: #111;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.clavierEmailActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.3fr;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.clavierEmailActions button {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+#validerEmailClavier {
+  background: #ffd400;
+  color: #000;
+  font-size: 16px;
+  font-weight: bold;
+  border: 2px solid #fff;
+  min-height: 42px;
+}
+
+#validerEmailClavier:active {
+  transform: scale(.96);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:600px) {
+
+  #micro {
+    right: 8px;
+    bottom: 15px;
+  }
+
+  #micro img {
+    width: 135px;
+  }
+
+  #themesContainer {
+    left: 8px;
+    bottom: 15px;
+  }
+
+  #boutonThemes {
+    width: 125px;
+  }
+
+  .servicesCommande {
+    width: 125px;
+    min-height: 38px;
+    font-size: 13px;
+    padding: 7px 10px;
+  }
+
+  #themesMenu {
+    width: 86vw;
+    max-height: 65vh;
+  }
+
+  .themeItem {
+    font-size: 14px;
+    padding: 9px 10px;
+  }
+
+  #etat {
+    font-size: 13px;
+    bottom: 4px;
+  }
+
+  #imageSupplementaire {
+    left: 0 !important;
+    top: 7vh !important;
+    width: 42vw !important;
+    height: 32vh !important;
+    max-width: 42vw;
+    max-height: 32vh;
+  }
+
+  #emailConfirmation {
+    left: 3vw;
+    top: 10%;
+    max-width: 50vw;
+    padding: 10px 14px;
+    font-size: 17px;
+  }
+
+  #clavierEmail {
+    padding: 5px 6px 6px;
+  }
+
+  .clavierEmailBoite {
+    width: min(94vw,600px);
+    padding: 7px;
+    border-radius: 12px;
+  }
+
+  #champEmailClavier {
+    font-size: 16px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+  }
+
+  .clavierEmailTouches {
+    grid-template-columns: repeat(7,1fr);
+    gap: 3px;
+  }
+
+  .clavierEmailTouches button {
+    padding: 6px 2px;
+    min-height: 32px;
+    font-size: 14px;
+  }
+
+  .clavierEmailActions {
+    gap: 4px;
+    margin-top: 5px;
+  }
+
+  .clavierEmailActions button {
+    min-height: 38px;
+    padding: 7px 3px;
+    font-size: 12px;
+  }
+
+  #validerEmailClavier {
+    font-size: 14px;
+  }
+}
+
+.fondSophia {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* =========================
+   CARROUSEL 3D BIBLIOTHÈQUE MUSICALE
+   AJOUT INDÉPENDANT — NE MODIFIE PAS LE CARROUSEL SERVICES
+========================= */
+#musicCarousel {
+  position: fixed;
+  left: 0;
+  top: 11vh;
+  width: min(360px, 34vw);
+  height: min(300px, 34vh);
+  z-index: 60;
+  display: none;
+  perspective: 950px;
+  pointer-events: none;
+}
+#musicCarousel.actif { display: block; }
+.musicScene {
+  position: relative; width: 100%; height: 100%; transform-style: preserve-3d;
+}
+.musicCarte {
+  position: absolute; left: 50%; top: 50%;
+  width: 31%; height: 72%;
+  transform-style: preserve-3d;
+  border-radius: 14px; overflow: hidden;
+  background: #111; border: 2px solid rgba(255,255,255,.85);
+  box-shadow: 0 8px 25px rgba(0,0,0,.65);
+  backface-visibility: hidden;
+  transition: transform .65s ease, opacity .65s ease, filter .65s ease;
+}
+.musicCarte img { width:100%; height:100%; object-fit:cover; display:block; }
+.musicNom {
+  position:absolute; left:0; right:0; bottom:0; padding:8px 5px;
+  background:linear-gradient(transparent,rgba(0,0,0,.92));
+  color:#fff; text-align:center; font-size:clamp(10px,1.1vw,15px);
+  font-weight:bold; text-shadow:0 1px 3px #000;
+}
+.musicTitre {
+  position:absolute; left:4%; right:4%; top:-8px; color:#fff;
+  text-align:center; font-size:clamp(13px,1.6vw,18px); font-weight:bold;
+  text-shadow:0 2px 5px #000; z-index:10;
+}
+.musicControle {
+  position:absolute; left:50%; bottom:-5px; transform:translateX(-50%);
+  padding:6px 12px; border-radius:20px; background:rgba(0,0,0,.78);
+  color:#fff; font-size:12px; white-space:nowrap; text-shadow:0 1px 3px #000;
+}
+@media(max-width:600px) {
+  #musicCarousel { left:0; top:11vh; width:56vw; height:34vh; }
+  .musicCarte { width:44%; height:70%; }
+}
+
+
+/* Commandes musicales : exactement au même emplacement que les commandes services */
+#musicCommandes {
+  display: none;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 9px;
+  pointer-events: auto;
+  z-index: 80;
+}
+#musicCommandes.actif { display: flex; }
+#musicCommandes button {
+  width: 160px;
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 12px;
+  background: rgba(20,20,20,.92);
+  color: #fff;
+  font-size: 15px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,.55);
+  transition: transform .15s ease, background .15s ease;
+}
+#musicCommandes button:hover {
+  background: rgba(55,55,55,.96);
+  transform: scale(1.03);
+}
+#musicCommandes button:active { transform: scale(.96); }
+@media(max-width:600px) {
+  #musicCommandes button { width: 160px; min-height: 38px; padding: 7px 10px; font-size: 13px; }
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="avatar">
+
+  <img
+    id="imageAvatar"
+    class="fondSophia"
+    src="assets/avatar.jpg"
+    alt="Sophia"
+  >
+
+  <video
+    id="videoAvatar"
+    preload="auto"
+    playsinline
+  ></video>
+
+  <div id="overlay"></div>
+
+  <img
+    id="imageSupplementaire"
+    alt="Image associée"
+  >
+
+
+
+  <div id="musicCarousel" aria-hidden="true">
+    <div class="musicScene" id="musicScene"></div>
+    <div class="musicTitre">🎵 Bibliothèque musicale</div>
+    <div class="musicControle" id="musicControle">Dites « stop » pour écouter le morceau affiché</div>
+  </div>
+
+  <div id="servicesCarousel" aria-hidden="true">
+    <div class="servicesScene" id="servicesScene"></div>
+    <div class="servicesTitre">🎠 Les différents services</div>
+    <div class="servicesControle" id="servicesControle">Dites « stop » pour choisir</div>
+  </div>
+
+</div>
+
+<audio id="lecteurAudio" preload="auto"></audio>
+
+<button id="micro" type="button" aria-label="Parler à Sophia">
+  <img
+    src="assets/bouton-tirer-parler.png"
+    alt="Parler à Sophia"
+  >
+</button>
+
+<div id="themesContainer">
+
+  <div id="servicesCommandes" aria-hidden="true">
+    <button id="boutonRelanceCarrousel" class="servicesCommande" type="button">▶ Relance</button>
+    <button id="boutonStopCarrousel" class="servicesCommande" type="button">■ Stop</button>
+    <button id="boutonFermerCarrousel" class="servicesCommande" type="button">✕ Fermer</button>
+  </div>
+
+  <div id="musicCommandes" aria-hidden="true">
+    <button id="boutonRelanceMusique" class="servicesCommande" type="button">▶ Relance</button>
+    <button id="boutonStopMusique" class="servicesCommande" type="button">■ Stop</button>
+    <button id="boutonFermerMusique" class="servicesCommande" type="button">✕ Fermer</button>
+  </div>
+
+  <div id="themesMenu">
+
+    <button class="themeItem" data-question="Bonjour">
+      👋 Bonjour / accueil
+    </button>
+
+    <button class="themeItem" data-question="Dans quels services est-ce que tu peux être utilisée ?">
+      🎠 Les différents services
+    </button>
+
+    <button class="themeItem" data-question="Présente-moi Château-Thierry">
+      🏘️ Présentation de Château-Thierry
+    </button>
+
+    <button class="themeItem" data-question="Qui est Jean de La Fontaine ?">
+      📖 Jean de La Fontaine
+    </button>
+
+    <button class="themeItem" data-question="Je voudrais prendre rendez-vous">
+      📅 Prendre rendez-vous
+    </button>
+
+    <button class="themeItem themeParent" id="boutonFables" type="button">
+      <span>📚 Ses fables</span>
+      <span class="fleche">▼</span>
+    </button>
+
+    <div class="submenu" id="fablesSubmenu">
+
+      <button class="themeItem" data-question="Le Corbeau et le Renard">
+        🐦 Le Corbeau et le Renard
+      </button>
+
+      <button class="themeItem" data-question="La Cigale et la Fourmi">
+        🦗 La Cigale et la Fourmi
+      </button>
+
+      <button class="themeItem" data-question="Le Lièvre et la Tortue">
+        🐇 Le Lièvre et la Tortue
+      </button>
+
+      <button class="themeItem" data-question="Le Loup et l'Agneau">
+        🐺 Le Loup et l'Agneau
+      </button>
+
+      <button class="themeItem" data-question="Le Rat de ville et le Rat des champs">
+        🐀 Le Rat de ville et le Rat des champs
+      </button>
+
+    </div>
+
+    <button class="themeItem" data-question="Le maire">
+      🏛️ Le maire
+    </button>
+
+    <button class="themeItem" data-question="Montre-moi une photo du maire">
+      📷 Photo du maire
+    </button>
+
+    <button class="themeItem" data-question="Que peut-on voir au château médiéval ?">
+      🏰 Le château médiéval
+    </button>
+
+    <button class="themeItem" data-question="Pourquoi le château est-il important ?">
+      ⚔️ Le Moyen Âge
+    </button>
+
+    <button class="themeItem" data-question="Qu'est-ce que l'Hôtel-Dieu ?">
+      🏛️ L'Hôtel-Dieu
+    </button>
+
+    <button class="themeItem" data-question="Quelle rivière traverse Château-Thierry ?">
+      🌊 La Marne
+    </button>
+
+    <button class="themeItem" data-question="Y a-t-il du champagne autour de Château-Thierry ?">
+      🍇 Le champagne et les vignobles
+    </button>
+
+    <button class="themeItem" data-question="Que sont les Portes de la Champagne ?">
+      🚪 Les Portes de la Champagne
+    </button>
+
+    <button class="themeItem" data-question="Qu'est-ce que le monument américain de la Côte 204 ?">
+      🇺🇸 La Côte 204
+    </button>
+
+    <button class="themeItem" data-question="Quel est le lien entre Château-Thierry et la Grande Guerre ?">
+      🎖️ Château-Thierry et la Grande Guerre
+    </button>
+
+    <button class="themeItem" data-question="Qu'est-ce que la nécropole des Chesneaux ?">
+      🪦 La nécropole des Chesneaux
+    </button>
+
+    <button class="themeItem" data-question="Qu'est-ce que la Tour Balhan ?">
+      🗼 La Tour Balhan
+    </button>
+
+    <button class="themeItem" data-question="Que peut-on découvrir à l'église Saint-Crépin ?">
+      ⛪ Saint-Crépin
+    </button>
+
+    <button class="themeItem" data-question="Y a-t-il une roseraie au château ?">
+      🌹 La roseraie
+    </button>
+
+    <button class="themeItem" data-question="Peut-on voir de la fauconnerie au château ?">
+      🦅 La fauconnerie
+    </button>
+
+    <button class="themeItem" data-question="Qu'est-ce que le cinéma-théâtre Jean Cocteau ?">
+      🎭 Le cinéma-théâtre Jean Cocteau
+    </button>
+
+    <button class="themeItem" data-question="Qu'est-ce que la Fête Jean de La Fontaine ?">
+      🎉 La Fête Jean de La Fontaine
+    </button>
+
+    <button class="themeItem" data-question="Peut-on se promener et découvrir la ville à pied ?">
+      🚶 Les balades dans la ville
+    </button>
+
+    <button class="themeItem" data-question="Donne-moi une anecdote sur Château-Thierry">
+      💡 Des anecdotes
+    </button>
+
+  </div>
+
+  <img
+    id="boutonThemes"
+    src="assets/bouton-themes.png"
+    alt="Thèmes"
+  >
+
+</div>
+
+<div id="etat">
+  Cliquez une fois pour activer Sophia
+</div>
+
+<textarea id="texte"></textarea>
+
+<div id="emailConfirmation">
+  <span class="emailTitre">Adresse e-mail</span>
+  <span id="emailConfirmationTexte"></span>
+</div>
+
+<div id="clavierEmail" aria-hidden="true">
+
+  <div class="clavierEmailBoite">
+
+    <input
+      id="champEmailClavier"
+      type="text"
+      inputmode="email"
+      autocomplete="off"
+      autocapitalize="none"
+      spellcheck="false"
+      placeholder="Votre adresse e-mail"
+    >
+
+    <div class="clavierEmailTouches">
+
+      <button type="button" data-touche="1">1</button>
+      <button type="button" data-touche="2">2</button>
+      <button type="button" data-touche="3">3</button>
+      <button type="button" data-touche="4">4</button>
+      <button type="button" data-touche="5">5</button>
+      <button type="button" data-touche="6">6</button>
+      <button type="button" data-touche="7">7</button>
+      <button type="button" data-touche="8">8</button>
+      <button type="button" data-touche="9">9</button>
+      <button type="button" data-touche="0">0</button>
+
+      <button type="button" data-touche="q">q</button>
+      <button type="button" data-touche="w">w</button>
+      <button type="button" data-touche="e">e</button>
+      <button type="button" data-touche="r">r</button>
+      <button type="button" data-touche="t">t</button>
+      <button type="button" data-touche="y">y</button>
+      <button type="button" data-touche="u">u</button>
+      <button type="button" data-touche="i">i</button>
+      <button type="button" data-touche="o">o</button>
+      <button type="button" data-touche="p">p</button>
+
+      <button type="button" data-touche="a">a</button>
+      <button type="button" data-touche="s">s</button>
+      <button type="button" data-touche="d">d</button>
+      <button type="button" data-touche="f">f</button>
+      <button type="button" data-touche="g">g</button>
+      <button type="button" data-touche="h">h</button>
+      <button type="button" data-touche="j">j</button>
+      <button type="button" data-touche="k">k</button>
+      <button type="button" data-touche="l">l</button>
+      <button type="button" data-touche="m">m</button>
+
+      <button type="button" data-touche="z">z</button>
+      <button type="button" data-touche="x">x</button>
+      <button type="button" data-touche="c">c</button>
+      <button type="button" data-touche="v">v</button>
+      <button type="button" data-touche="b">b</button>
+      <button type="button" data-touche="n">n</button>
+      <button type="button" data-touche="_">_</button>
+      <button type="button" data-touche="-">-</button>
+      <button type="button" data-touche=".">.</button>
+      <button type="button" data-touche="@">@</button>
+
+      <button type="button" data-action="backspace">⌫</button>
+
+    </div>
+
+    <div class="clavierEmailActions">
+
+      <button type="button" id="effacerEmailClavier">
+        ⌫ Effacer
+      </button>
+
+      <button type="button" id="toutEffacerEmailClavier">
+        Tout effacer
+      </button>
+
+      <button type="button" id="validerEmailClavier">
+        ✅ VALIDER
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   ÉLÉMENTS
+========================================================= */
+
+const imageAvatar =
+  document.getElementById("imageAvatar");
+
+const videoAvatar =
+  document.getElementById("videoAvatar");
+
+const lecteurAudio =
+  document.getElementById("lecteurAudio");
+
+const micro =
+  document.getElementById("micro");
+
+const etat =
+  document.getElementById("etat");
+
+const texte =
+  document.getElementById("texte");
+
+const imageSupplementaire =
+  document.getElementById("imageSupplementaire");
+
+const servicesCarousel =
+  document.getElementById("servicesCarousel");
+
+const servicesScene =
+  document.getElementById("servicesScene");
+
+const servicesControle =
+  document.getElementById("servicesControle");
+
+const boutonThemes =
+  document.getElementById("boutonThemes");
+
+const servicesCommandes =
+  document.getElementById("servicesCommandes");
+
+const boutonRelanceCarrousel =
+  document.getElementById("boutonRelanceCarrousel");
+
+const boutonStopCarrousel =
+  document.getElementById("boutonStopCarrousel");
+
+const boutonFermerCarrousel =
+  document.getElementById("boutonFermerCarrousel");
+
+const themesMenu =
+  document.getElementById("themesMenu");
+
+const boutonFables =
+  document.getElementById("boutonFables");
+
+const fablesSubmenu =
+  document.getElementById("fablesSubmenu");
+
+
+
+
+/* =========================================================
+   BIBLIOTHÈQUE MUSICALE — AJOUT INDÉPENDANT
+========================================================= */
+
+const musicCarousel = document.getElementById("musicCarousel");
+const musicScene = document.getElementById("musicScene");
+const musicControle = document.getElementById("musicControle");
+const musicCommandes = document.getElementById("musicCommandes");
+const boutonRelanceMusique = document.getElementById("boutonRelanceMusique");
+const boutonStopMusique = document.getElementById("boutonStopMusique");
+const boutonFermerMusique = document.getElementById("boutonFermerMusique");
+
+let musicCarouselActif = false;
+let musicCarouselIndex = 0;
+let musicCarouselTimer = null;
+let musicSelection = null;
+/* Empêche qu'un même « stop » (interim puis final) relance l'arrêt
+   juste après avoir sélectionné un morceau du carrousel. */
+let verrouSelectionMusiqueJusqua = 0;
+
+/*
+  Les quatre emplacements utilisent les noms ci-dessous.
+  Les deux premiers correspondent aux morceaux déjà identifiés
+  dans le projet. Les deux autres sont volontairement des noms
+  simples à remplacer par tes deux autres couples image/MP3.
+*/
+const musicLibrary = [
+  { nom: "Positif, vibration", image: "assets/positif-vibration.jpg", audio: "audio/positif-vibration.mp3" },
+  { nom: "Punky Reggae Party", image: "assets/punky-reggae-party.jpg", audio: "audio/punky-reggae-party.mp3" },
+  { nom: "Is This Love", image: "assets/is-this-love.jpg", audio: "audio/is-this-love.mp3" },
+  { nom: "War No More Trouble", image: "assets/war-no-more-trouble.jpg", audio: "audio/war-no-more-trouble.mp3" }
+];
+
+function estCommandeBibliothequeMusicale(phrase) {
+  const q = retirerSophia(phrase || "");
+
+  return (
+    q.includes("bibliotheque musicale") ||
+    q.includes("bibliotheque de musique") ||
+    q.includes("bibliotheque music") ||
+    q.includes("carrousel musical") ||
+    q.includes("carrousel musique") ||
+    q.includes("ecouter une bibliotheque musicale") ||
+    q.includes("ecouter la bibliotheque musicale") ||
+    q.includes("ecoute une bibliotheque musicale") ||
+    q.includes("ecoute la bibliotheque musicale") ||
+    q.includes("aimerais ecouter une bibliotheque musicale") ||
+    q.includes("aimerais ecouter la bibliotheque musicale") ||
+    q.includes("voudrais ecouter une bibliotheque musicale") ||
+    q.includes("voudrais ecouter la bibliotheque musicale") ||
+    q.includes("veux ecouter une bibliotheque musicale") ||
+    q.includes("veux ecouter la bibliotheque musicale") ||
+    q.includes("ouvrir la bibliotheque musicale") ||
+    q.includes("montre la bibliotheque musicale") ||
+    q.includes("affiche la bibliotheque musicale")
+  );
+}
+
+/* Vidéo de réponse avant l'ouverture du carrousel musical.
+   Place la vidéo correspondante dans le dossier videos/. */
+const VIDEO_REPONSE_BIBLIOTHEQUE_MUSICALE =
+  "videos/bibliotheque-musicale.mp4";
+
+function positionnerCarrouselMusique() {
+  if (!musicScene) return;
+  const cartes = musicScene.querySelectorAll(".musicCarte");
+  const positions = [
+    { x:-115, z:-170, s:.72, o:.35, f:"blur(1px)" },
+    { x:-48,  z:-45,  s:.88, o:.78, f:"none" },
+    { x:0,    z:0,    s:1.08, o:1,    f:"none" },
+    { x:48,   z:-45,  s:.88, o:.78, f:"none" },
+    { x:115,  z:-170, s:.72, o:.35, f:"blur(1px)" }
+  ];
+  const n = musicLibrary.length;
+  cartes.forEach((carte, i) => {
+    let d = (i - musicCarouselIndex + n) % n;
+    if (d > n / 2) d -= n;
+    const pos = positions[Math.max(0, Math.min(4, d + 2))];
+    carte.style.transform = `translate(-50%,-50%) translateX(${pos.x}px) translateZ(${pos.z}px) scale(${pos.s})`;
+    carte.style.opacity = pos.o;
+    carte.style.filter = pos.f;
+    carte.style.zIndex = String(10 - Math.abs(d));
+  });
+}
+
+function rendreCarrouselMusique() {
+  if (!musicScene) return;
+  musicScene.innerHTML = "";
+  musicLibrary.forEach((morceau) => {
+    const carte = document.createElement("div");
+    carte.className = "musicCarte";
+    const img = document.createElement("img");
+    img.src = morceau.image;
+    img.alt = morceau.nom;
+    const nom = document.createElement("div");
+    nom.className = "musicNom";
+    nom.textContent = morceau.nom;
+    carte.appendChild(img);
+    carte.appendChild(nom);
+    musicScene.appendChild(carte);
+  });
+  positionnerCarrouselMusique();
+}
+
+function demarrerCarrouselMusique() {
+  arreterCarrouselMusique(false);
+  musicCarouselActif = true;
+  musicSelection = null;
+  musicCarouselIndex = 0;
+  verrouSelectionMusiqueJusqua = 0;
+  musicCarousel.classList.add("actif");
+  musicCarousel.setAttribute("aria-hidden", "false");
+  if (musicCommandes) {
+    musicCommandes.classList.add("actif");
+    musicCommandes.setAttribute("aria-hidden", "false");
+  }
+  musicControle.textContent = "Dites « stop » pour écouter le morceau affiché";
+  rendreCarrouselMusique();
+  musicCarouselTimer = setInterval(() => {
+    if (!musicCarouselActif) return;
+    musicCarouselIndex = (musicCarouselIndex + 1) % musicLibrary.length;
+    positionnerCarrouselMusique();
+  }, 1200);
+
+  // Toujours tenter de reprendre l'écoute : le carrousel doit
+  // pouvoir recevoir « stop » même si une vidéo vient de finir.
+  if (modeVeille && !modeSommeil) {
+    setTimeout(() => {
+      if (musicCarouselActif && !modeSommeil && !servicesVideoEnCours) {
+        demarrerEcoute();
+      }
+    }, 400);
+  }
+}
+
+function arreterCarrouselMusique(jouerMorceau = true) {
+  if (!musicCarouselActif) return false;
+
+  musicCarouselActif = false;
+
+  if (musicCarouselTimer) {
+    clearInterval(musicCarouselTimer);
+    musicCarouselTimer = null;
+  }
+
+  const indexSelection = Math.max(
+    0,
+    Math.min(musicCarouselIndex, musicLibrary.length - 1)
+  );
+  musicSelection = musicLibrary[indexSelection];
+
+  positionnerCarrouselMusique();
+
+  if (!musicSelection) return false;
+
+  musicControle.textContent = "✓ " + musicSelection.nom;
+
+  if (jouerMorceau) {
+    /* Verrouille les prochains « stop » (souvent le résultat final
+       de la même utterance) pour ne pas couper le MP3 qui démarre. */
+    verrouSelectionMusiqueJusqua = Date.now() + 2800;
+    jouerMusiqueCarrousel(musicSelection);
+  }
+
+  return true;
+}
+
+/*
+  Lecture dédiée au carrousel musical.
+  IMPORTANT :
+  - aucune image supplémentaire n'est affichée ;
+  - le MP3 de la carte sélectionnée est chargé directement ;
+  - on affiche une erreur explicite si le fichier audio est introuvable
+    ou si le navigateur refuse la lecture.
+*/
+function jouerMusiqueCarrousel(morceau) {
+  if (!morceau || !morceau.audio || !lecteurAudio) {
+    console.error("❌ Aucun MP3 associé à la sélection musicale.");
+    etat.textContent = "⚠️ Aucun MP3 associé à ce morceau.";
+    return;
+  }
+
+  arreterMusique();
+
+  audioLectureEnCours = true;
+
+  // Garder l'écoute vocale active pendant le MP3 pour permettre « arrête la musique ».
+
+  if (nettoyageVideoActuelle) {
+    nettoyageVideoActuelle();
+    nettoyageVideoActuelle = null;
+  }
+
+  videoAvatar.pause();
+  videoAvatar.removeAttribute("src");
+  videoAvatar.load();
+  videoAvatar.style.opacity = "0";
+  imageAvatar.style.opacity = "1";
+
+  /* Pas d'imageSupplementaire pour le carrousel musical. */
+  imageSupplementaire.style.display = "none";
+  imageSupplementaire.removeAttribute("src");
+
+  lecteurAudio.pause();
+  lecteurAudio.currentTime = 0;
+  lecteurAudio.removeAttribute("src");
+  lecteurAudio.src = morceau.audio;
+  lecteurAudio.load();
+
+  musiqueEnCours = true;
+  audioLectureEnCours = true;
+  etat.textContent = "🎵 Lecture : " + morceau.nom;
+
+  const finMusique = () => {
+    musiqueEnCours = false;
+    audioLectureEnCours = false;
+
+    lecteurAudio.removeEventListener("ended", finMusique);
+    lecteurAudio.removeEventListener("error", erreurAudio);
+    lecteurAudio.removeEventListener("canplay", pretALire);
+
+    etat.textContent = "🎵 Musique terminée.";
+    signalerInteraction();
+
+    if (modeVeille) {
+      setTimeout(demarrerEcoute, 500);
+    }
+  };
+
+  const erreurAudio = () => {
+    musiqueEnCours = false;
+    audioLectureEnCours = false;
+
+    lecteurAudio.removeEventListener("ended", finMusique);
+    lecteurAudio.removeEventListener("error", erreurAudio);
+    lecteurAudio.removeEventListener("canplay", pretALire);
+
+    console.error("❌ Impossible de lire le MP3 :", morceau.audio);
+    etat.textContent = "⚠️ Impossible de lire le MP3 : " + morceau.nom +
+      " (vérifiez le chemin " + morceau.audio + ")";
+  };
+
+  const lancerLecture = () => {
+    const promesseLecture = lecteurAudio.play();
+
+    if (promesseLecture && typeof promesseLecture.catch === "function") {
+      promesseLecture.catch(erreur => {
+        console.error("❌ Erreur de lecture MP3 :", erreur);
+
+        /* Second essai après un court délai (changement de source / autoplay). */
+        setTimeout(() => {
+          if (!musiqueEnCours) return;
+
+          const secondeTentative = lecteurAudio.play();
+
+          if (secondeTentative && typeof secondeTentative.catch === "function") {
+            secondeTentative.catch(erreur2 => {
+              console.error("❌ Deuxième tentative de lecture MP3 échouée :", erreur2);
+              musiqueEnCours = false;
+              audioLectureEnCours = false;
+              lecteurAudio.removeEventListener("ended", finMusique);
+              lecteurAudio.removeEventListener("error", erreurAudio);
+              etat.textContent = "⚠️ Le MP3 n'a pas pu être lancé. Cliquez sur ■ Stop puis réessayez, ou vérifiez le fichier audio.";
+            });
+          }
+        }, 200);
+      });
+    }
+  };
+
+  const pretALire = () => {
+    lecteurAudio.removeEventListener("canplay", pretALire);
+    lancerLecture();
+  };
+
+  lecteurAudio.addEventListener("ended", finMusique);
+  lecteurAudio.addEventListener("error", erreurAudio);
+  lecteurAudio.addEventListener("canplay", pretALire);
+
+  /* Si le fichier est déjà en cache, canplay peut ne pas se redéclencher. */
+  if (lecteurAudio.readyState >= 2) {
+    lancerLecture();
+  }
+
+  /* Relancer l'écoute pour permettre « arrête la musique » pendant la lecture. */
+  if (modeVeille && !modeSommeil) {
+    setTimeout(demarrerEcoute, 500);
+  }
+}
+
+function fermerCarrouselMusique() {
+  if (musicCarouselTimer) { clearInterval(musicCarouselTimer); musicCarouselTimer = null; }
+  musicCarouselActif = false;
+  musicSelection = null;
+  musicCarousel.classList.remove("actif");
+  musicCarousel.setAttribute("aria-hidden", "true");
+  if (musicCommandes) {
+    musicCommandes.classList.remove("actif");
+    musicCommandes.setAttribute("aria-hidden", "true");
+  }
+  if (musiqueEnCours) {
+    stopMusiqueEtRetourEcoute();
+  }
+}
+
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let connaissances = null;
+let reconnaissance = null;
+let reconnaissanceActive = false;
+
+let modeVeille = false;
+let modeSommeil = false;
+
+let attenteQuestion = false;
+let traitementQuestion = false;
+let microphoneAutorise = false;
+let conversationActive = false;
+let lectureBonjour = false;
+let videoEnPause = false;
+let sourceVideo = null;
+let nettoyageVideoActuelle = null;
+let actionAuDemarrageVideo = null;
+
+let servicesCarouselActif = false;
+let servicesCarouselIndex = 0;
+let servicesCarouselTimer = null;
+let servicesRoleSelectionne = null;
+let servicesVideoEnCours = false;
+let ecouteSuspendueParVideoService = false;
+
+/*
+   IMPORTANT :
+   Cette variable bloque les résultats vocaux qui peuvent
+   encore arriver après l'arrêt de la reconnaissance.
+   Cela évite que le son d'une vidéo du carrousel soit
+   interprété comme une question adressée à Sophia.
+*/
+let blocageResultatsService = false;
+let resultatsServiceInterditsJusqua = 0;
+
+const servicesRoles = [
+  { nom: "Accueil police", image: "assets/service-police.jpg", video: "videos/services-police.mp4" },
+  { nom: "Accueil médical", image: "assets/service-medical.jpg", video: "videos/services-medical.mp4" },
+  { nom: "Médiathèque", image: "assets/service-mediatheque.jpg", video: "videos/services-mediatheque.mp4" },
+  { nom: "Accueil mairie", image: "assets/service-mairie.jpg", video: "videos/services-mairie.mp4" },
+  { nom: "Office de tourisme", image: "assets/service-tourisme.jpg", video: "videos/services-tourisme.mp4" }
+];
+
+let musiqueEnCours = false;
+let audioLectureEnCours = false;
+let attenteMorceauBobMarley = false;
+
+let rendezVousActif = false;
+let rendezVousEtape = null;
+let rendezVousConfirmationEmail = 0;
+let rendezVousEmailEnAttente = "";
+
+let rendezVousDonnees = {
+  date: "",
+  heure: "",
+  nom: "",
+  email: "",
+  motif: ""
+};
+
+
+/* =========================================================
+   MINUTEUR DE VEILLE
+========================================================= */
+
+const DELAI_VEILLE = 1 * 60 * 1000;
+
+let minuterieVeille = null;
+
+
+/* =========================================================
+   RÉINITIALISER LE MINUTEUR
+========================================================= */
+
+function redemarrerMinuterieVeille() {
+
+  if (!modeVeille || modeSommeil) {
+    return;
+  }
+
+  if (minuterieVeille) {
+    clearTimeout(minuterieVeille);
+  }
+
+  minuterieVeille = setTimeout(
+    entrerEnVeilleAutomatique,
+    DELAI_VEILLE
+  );
+
+  console.log(
+    "⏱️ Minuteur de veille redémarré : 1 minute"
+  );
+}
+
+
+/* =========================================================
+   ENTRER EN VEILLE AUTOMATIQUEMENT
+========================================================= */
+
+function entrerEnVeilleAutomatique() {
+
+  if (!modeVeille) {
+    return;
+  }
+
+  console.log(
+    "😴 SOPHIA ENTRE EN VEILLE APRÈS 1 MINUTE"
+  );
+
+  modeSommeil = true;
+
+  attenteQuestion = false;
+  traitementQuestion = false;
+  conversationActive = false;
+
+  rendezVousActif = false;
+  rendezVousEtape = null;
+
+  attenteMorceauBobMarley = false;
+
+  arreterCarrouselServices(false);
+
+  if (servicesCarousel) {
+    servicesCarousel.classList.remove("actif");
+    servicesCarousel.setAttribute("aria-hidden", "true");
+  }
+
+  if (servicesCommandes) {
+    servicesCommandes.classList.remove("actif");
+    servicesCommandes.setAttribute("aria-hidden", "true");
+  }
+
+  arreterMusique();
+
+  cacherClavierEmail();
+  cacherEmailConfirmation();
+
+  if (reconnaissance) {
+    try {
+      reconnaissance.stop();
+    } catch (erreur) {}
+  }
+
+  etat.textContent =
+    "😴 Sophia est en veille... Dites « Sophia » pour la réveiller.";
+}
+
+
+/* =========================================================
+   RÉVEILLER SOPHIA
+========================================================= */
+
+async function reveillerSophia() {
+
+  console.log(
+    "✨ RÉVEIL DE SOPHIA"
+  );
+
+  modeSommeil = false;
+  modeVeille = true;
+
+  attenteQuestion = false;
+  traitementQuestion = true;
+  conversationActive = false;
+
+  if (minuterieVeille) {
+    clearTimeout(minuterieVeille);
+    minuterieVeille = null;
+  }
+
+  if (reconnaissance) {
+    try {
+      reconnaissance.stop();
+    } catch (erreur) {}
+  }
+
+  etat.textContent =
+    "🎬 Sophia vous répond...";
+
+  try {
+
+    await jouerVideo(
+      "videos/je-vous-ecoute.mp4"
+    );
+
+  } catch (erreur) {
+
+    console.warn(
+      "⚠️ Vidéo de réveil indisponible :",
+      erreur
+    );
+  }
+
+  modeSommeil = false;
+  modeVeille = true;
+
+  attenteQuestion = false;
+  traitementQuestion = false;
+  conversationActive = true;
+
+  etat.textContent =
+    "👂 Je vous écoute...";
+
+  redemarrerMinuterieVeille();
+
+  if (modeVeille && !modeSommeil) {
+
+    setTimeout(
+      demarrerEcoute,
+      300
+    );
+  }
+}
+
+
+/* =========================================================
+   INTERACTION UTILISATEUR
+========================================================= */
+
+function signalerInteraction() {
+
+  if (!modeVeille) {
+    return;
+  }
+
+  if (modeSommeil) {
+    return;
+  }
+
+  redemarrerMinuterieVeille();
+}
+
+
+/* =========================================================
+   CHARGEMENT BASE
+========================================================= */
+
+async function chargerConnaissances() {
+
+  try {
+
+    const reponse =
+      await fetch(
+        "connaissances.json?cache=" +
+        Date.now()
+      );
+
+    if (!reponse.ok) {
+      throw new Error(
+        "Impossible de charger connaissances.json"
+      );
+    }
+
+    connaissances =
+      await reponse.json();
+
+    console.log(
+      "✅ Base de connaissances chargée"
+    );
+
+  } catch (erreur) {
+
+    console.error(
+      "❌ Erreur connaissances.json :",
+      erreur
+    );
+
+    etat.textContent =
+      "⚠️ Impossible de charger les connaissances.";
+  }
+}
+
+
+/* =========================================================
+   NORMALISATION
+========================================================= */
+
+function normaliser(texte) {
+
+  return String(texte || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^\w\s]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function contientExpression(
+  texte,
+  expression
+) {
+
+  const t =
+    " " + normaliser(texte) + " ";
+
+  const e =
+    " " + normaliser(expression) + " ";
+
+  return t.includes(e);
+}
+
+
+/* =========================================================
+   SOPHIA
+========================================================= */
+
+function contientSophia(phrase) {
+
+  const texteNormalise =
+    normaliser(phrase);
+
+  return (
+    contientExpression(
+      texteNormalise,
+      "sophia"
+    ) ||
+    contientExpression(
+      texteNormalise,
+      "sofia"
+    )
+  );
+}
+
+function retirerSophia(phrase) {
+
+  let resultat =
+    normaliser(phrase);
+
+  resultat =
+    resultat.replace(
+      /\bsophia\b/g,
+      ""
+    );
+
+  resultat =
+    resultat.replace(
+      /\bsofia\b/g,
+      ""
+    );
+
+  return resultat
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+
+/* =========================================================
+   STOP CARROUSEL
+========================================================= */
+
+function estCommandeStopCarrousel(phrase) {
+
+  const q =
+    retirerSophia(phrase);
+
+  if (!q) return false;
+
+  /* Correspondances exactes ou préfixes */
+  if (
+    q === "stop" ||
+    q.startsWith("stop ") ||
+    q === "stoppe" ||
+    q.startsWith("stoppe ") ||
+    q === "arrete" ||
+    q.startsWith("arrete ") ||
+    q === "arret" ||
+    q.startsWith("arret ") ||
+    q === "stop carrousel" ||
+    q === "stop le carrousel" ||
+    q === "arrete carrousel" ||
+    q === "arrete le carrousel" ||
+    q === "choisis" ||
+    q === "selectionne" ||
+    q === "celui la" ||
+    q === "celui-ci" ||
+    q === "ce morceau"
+  ) {
+    return true;
+  }
+
+  /* Contient un mot d'arrêt clair (reconnaissance parfois approximative) */
+  const motsArret = [
+    "stop",
+    "stoppe",
+    "arrete",
+    "arret",
+    "choisis",
+    "selectionne"
+  ];
+  const parties = q.split(" ").filter(Boolean);
+  if (parties.some(p => motsArret.includes(p))) {
+    return true;
+  }
+
+  return false;
+}
+
+
+function estCommandeRelanceCarrousel(phrase) {
+
+  const q = retirerSophia(phrase);
+
+  return (
+    q === "relance" ||
+    q === "relancer" ||
+    q === "relance le carrousel" ||
+    q === "relancer le carrousel" ||
+    q === "reprend le carrousel" ||
+    q === "reprendre le carrousel" ||
+    q === "reprends le carrousel"
+  );
+}
+
+
+function estCommandeFermerCarrousel(phrase) {
+
+  const q = retirerSophia(phrase);
+
+  return (
+    q === "ferme" ||
+    q === "fermer" ||
+    q === "ferme le carrousel" ||
+    q === "fermer le carrousel" ||
+    q === "j ai fini" ||
+    q === "j'ai fini"
+  );
+}
+
+
+function estCommandeStop(phrase) {
+
+  const q =
+    retirerSophia(phrase);
+
+  const commandesStop = [
+    "stop",
+    "arrete",
+    "arret",
+    "arrête",
+    "arrête la musique",
+    "arrete la musique",
+    "stop la musique",
+    "stop musique",
+    "arrête le morceau",
+    "arrete le morceau",
+    "stop le morceau",
+    "stop morceau",
+    "arrête cette musique",
+    "arrete cette musique",
+    "stop cette musique",
+    "arrête ça",
+    "arrete ca",
+    "stop ça",
+    "stop ca"
+  ];
+
+  return commandesStop.some(
+    commande =>
+      q === normaliser(commande)
+  );
+}
+
+
+/* =========================================================
+   MUSIQUE
+========================================================= */
+
+function trouverMusique(question) {
+
+  const q =
+    normaliser(question);
+
+  if (q.includes("one love")) {
+
+    return connaissances.reponses.find(
+      r => r.id === "one_love"
+    );
+  }
+
+  if (q.includes("redemption song")) {
+
+    return connaissances.reponses.find(
+      r => r.id === "redemption_song"
+    );
+  }
+
+  const parleDeBobMarley =
+    q.includes("bob marley") ||
+    q.includes("bob") ||
+    q.includes("marley");
+
+  const demandeMusique =
+    q.includes("joue") ||
+    q.includes("jouer") ||
+    q.includes("mets") ||
+    q.includes("met") ||
+    q.includes("lance") ||
+    q.includes("musique") ||
+    q.includes("morceau") ||
+    q.includes("chanson") ||
+    q.includes("ecoute") ||
+    q.includes("ecouter");
+
+  if (
+    parleDeBobMarley &&
+    demandeMusique
+  ) {
+
+    const bobMarley =
+      connaissances.reponses.find(
+        r => r.id === "bob_marley"
+      );
+
+    if (bobMarley) {
+      return bobMarley;
+    }
+
+    return {
+      id: "bob_marley",
+      type: "demande_musique",
+      video: "videos/bob-marley.mp4",
+      texte:
+        "D’accord, quel morceau de Bob Marley veux-tu écouter ?"
+    };
+  }
+
+  return null;
+}
+
+
+/* =========================================================
+   FABLES
+========================================================= */
+
+function trouverFable(question) {
+
+  const q =
+    normaliser(question);
+
+  if (
+    q.includes("corbeau") &&
+    q.includes("renard")
+  ) {
+    return connaissances.reponses.find(
+      r => r.id === "fable_corbeau_renard"
+    );
+  }
+
+  if (
+    q.includes("cigale") &&
+    q.includes("fourmi")
+  ) {
+    return connaissances.reponses.find(
+      r => r.id === "fable_cigale_fourmi"
+    );
+  }
+
+  if (
+    q.includes("lievre") &&
+    q.includes("tortue")
+  ) {
+    return connaissances.reponses.find(
+      r => r.id === "fable_lievre_tortue"
+    );
+  }
+
+  if (
+    q.includes("loup") &&
+    q.includes("agneau")
+  ) {
+    return connaissances.reponses.find(
+      r => r.id === "fable_loup_agneau"
+    );
+  }
+
+  if (
+    q.includes("rat") &&
+    q.includes("ville") &&
+    q.includes("champ")
+  ) {
+    return connaissances.reponses.find(
+      r => r.id ===
+      "fable_rat_ville_rat_champs"
+    );
+  }
+
+  return null;
+}
+
+
+/* =========================================================
+   RENDEZ-VOUS
+========================================================= */
+
+function reponseRendezVousDepuisBase() {
+
+  if (
+    connaissances &&
+    Array.isArray(connaissances.reponses)
+  ) {
+
+    const reponse =
+      connaissances.reponses.find(
+        item =>
+          item.id === "rendez_vous" ||
+          item.type === "prise_rendez_vous"
+      );
+
+    if (reponse) {
+      return reponse;
+    }
+  }
+
+  return {
+    id: "rendez_vous",
+    type: "prise_rendez_vous",
+    video: "videos/rendez-vous.mp4",
+    texte:
+      "Bien sûr, je vais vous accompagner pour prendre votre rendez-vous."
+  };
+}
+
+function trouverDemandeRendezVous(question) {
+
+  const q =
+    normaliser(question);
+
+  if (
+    !q.includes("rendez vous") &&
+    !q.includes("rendezvous")
+  ) {
+    return null;
+  }
+
+  const demande =
+    q.includes("prendre") ||
+    q.includes("prends") ||
+    q.includes("veux") ||
+    q.includes("voudrais") ||
+    q.includes("souhaite") ||
+    q.includes("souhaiterais") ||
+    q.includes("reserver") ||
+    q.includes("reserve") ||
+    q.includes("avoir");
+
+  if (!demande) {
+    return null;
+  }
+
+  return reponseRendezVousDepuisBase();
+}
+
+function reinitialiserRendezVous() {
+
+  cacherEmailConfirmation();
+  cacherClavierEmail();
+
+  rendezVousActif = false;
+  rendezVousEtape = null;
+  rendezVousConfirmationEmail = 0;
+  rendezVousEmailEnAttente = "";
+
+  rendezVousDonnees = {
+    date: "",
+    heure: "",
+    nom: "",
+    email: "",
+    motif: ""
+  };
+}
+
+
+/* =========================================================
+   EMAIL
+========================================================= */
+
+function normaliserEmailVocal(texteEmail) {
+
+  let email =
+    String(texteEmail || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g,"")
+      .trim();
+
+  email =
+    email
+      .replace(
+        /\b(arobase|arobas|arobaze)\b/g,
+        " @ "
+      )
+      .replace(
+        /\b(point|dot)\b/g,
+        " . "
+      )
+      .replace(
+        /\b(tiret bas|tiret-bas|underscore|barre du bas)\b/g,
+        " _ "
+      )
+      .replace(
+        /\b(trait d union|trait d'union|tiret|moins)\b/g,
+        " - "
+      );
+
+  return email
+    .replace(/\s*@\s*/g,"@")
+    .replace(/\s*\.\s*/g,".")
+    .replace(/\s*_\s*/g,"_")
+    .replace(/\s*-\s*/g,"-")
+    .replace(/\s+/g,"");
+}
+
+function convertirEpellationEnEmail(texte) {
+
+  let t =
+    String(texte || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g,"")
+      .trim();
+
+  t =
+    t
+      .replace(
+        /\b(arobase|arobas|arobaze)\b/g,
+        " @ "
+      )
+      .replace(
+        /\b(point|dot)\b/g,
+        " . "
+      )
+      .replace(
+        /\b(tiret bas|tiret-bas|underscore|barre du bas)\b/g,
+        " _ "
+      )
+      .replace(
+        /\b(trait d union|trait d'union|tiret|moins)\b/g,
+        " - "
+      );
+
+  const morceaux =
+    t.split(/\s+/).filter(Boolean);
+
+  let reconstruit = "";
+
+  for (const mot of morceaux) {
+
+    if (
+      /^[a-z0-9]$/i.test(mot)
+    ) {
+      reconstruit += mot;
+    }
+    else if (
+      ["@",".","-","_"].includes(mot)
+    ) {
+      reconstruit += mot;
+    }
+    else {
+      reconstruit += mot;
+    }
+  }
+
+  return reconstruit
+    .replace(/\s+/g,"");
+}
+
+function emailValide(email) {
+
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+    email
+  );
+}
+
+
+/* =========================================================
+   AFFICHAGE EMAIL
+========================================================= */
+
+function afficherEmailConfirmation(email) {
+
+  const bloc =
+    document.getElementById(
+      "emailConfirmation"
+    );
+
+  const texteBloc =
+    document.getElementById(
+      "emailConfirmationTexte"
+    );
+
+  if (!bloc || !texteBloc) {
+    return;
+  }
+
+  texteBloc.textContent =
+    email || "";
+
+  bloc.style.display =
+    "block";
+}
+
+function cacherEmailConfirmation() {
+
+  const bloc =
+    document.getElementById(
+      "emailConfirmation"
+    );
+
+  if (bloc) {
+    bloc.style.display =
+      "none";
+  }
+}
+
+
+/* =========================================================
+   CLAVIER
+========================================================= */
+
+function afficherClavierEmail() {
+
+  const clavier =
+    document.getElementById(
+      "clavierEmail"
+    );
+
+  const champ =
+    document.getElementById(
+      "champEmailClavier"
+    );
+
+  if (!clavier || !champ) {
+    console.error(
+      "❌ Clavier e-mail introuvable."
+    );
+    return;
+  }
+
+  clavier.style.display =
+    "block";
+
+  clavier.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  setTimeout(
+    () => champ.focus(),
+    50
+  );
+}
+
+function cacherClavierEmail() {
+
+  const clavier =
+    document.getElementById(
+      "clavierEmail"
+    );
+
+  if (clavier) {
+
+    clavier.style.display =
+      "none";
+
+    clavier.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+  }
+}
+
+
+/* =========================================================
+   VALIDATION DU CLAVIER EMAIL
+========================================================= */
+
+async function validerEmailAvecClavier() {
+
+  const champ =
+    document.getElementById(
+      "champEmailClavier"
+    );
+
+  if (!champ) {
+    return;
+  }
+
+  const email =
+    champ.value
+      .trim()
+      .toLowerCase();
+
+  console.log(
+    "📧 Validation clavier :",
+    email
+  );
+
+  if (!emailValide(email)) {
+
+    etat.textContent =
+      "⚠️ Adresse e-mail invalide. Vérifiez-la puis appuyez sur VALIDER.";
+
+    champ.focus();
+
+    return;
+  }
+
+  cacherClavierEmail();
+
+  rendezVousDonnees.email =
+    email;
+
+  rendezVousEmailEnAttente =
+    email;
+
+  rendezVousConfirmationEmail =
+    3;
+
+  rendezVousEtape =
+    "confirmationEmail";
+
+  afficherEmailConfirmation(
+    email
+  );
+
+  traitementQuestion =
+    true;
+
+  if (reconnaissance) {
+    try {
+      reconnaissance.stop();
+    } catch (erreur) {}
+  }
+
+  etat.textContent =
+    "📧 Vérification de votre adresse e-mail...";
+
+  try {
+
+    await jouerVideo(
+      "videos/rendez-vous-email-confirmation-2.mp4"
+    );
+
+  } catch (erreur) {
+
+    console.warn(
+      "⚠️ Vidéo confirmation e-mail indisponible.",
+      erreur
+    );
+  }
+
+  afficherEmailConfirmation(
+    email
+  );
+
+  traitementQuestion =
+    false;
+
+  etat.textContent =
+    "📧 Vérifiez l'adresse puis dites oui ou non.";
+
+  signalerInteraction();
+
+  if (modeVeille && !modeSommeil) {
+
+    setTimeout(
+      demarrerEcoute,
+      400
+    );
+  }
+}
+
+function initialiserClavierEmail() {
+
+  const clavier =
+    document.getElementById(
+      "clavierEmail"
+    );
+
+  const champ =
+    document.getElementById(
+      "champEmailClavier"
+    );
+
+  const boutonValider =
+    document.getElementById(
+      "validerEmailClavier"
+    );
+
+  if (
+    !clavier ||
+    !champ ||
+    !boutonValider
+  ) {
+
+    console.error(
+      "❌ Impossible d'initialiser le clavier."
+    );
+
+    return;
+  }
+
+  if (
+    clavier.dataset.initialise ===
+    "oui"
+  ) {
+    return;
+  }
+
+  clavier.dataset.initialise =
+    "oui";
+
+  clavier
+    .querySelectorAll(
+      "[data-touche]"
+    )
+    .forEach(
+      bouton => {
+
+        bouton.addEventListener(
+          "click",
+          event => {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            champ.value +=
+              bouton.dataset.touche;
+
+            champ.focus();
+
+            signalerInteraction();
+          }
+        );
+      }
+    );
+
+  const backspace =
+    clavier.querySelector(
+      '[data-action="backspace"]'
+    );
+
+  if (backspace) {
+
+    backspace.addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        champ.value =
+          champ.value.slice(0,-1);
+
+        champ.focus();
+      }
+    );
+  }
+
+  const effacer =
+    document.getElementById(
+      "effacerEmailClavier"
+    );
+
+  if (effacer) {
+
+    effacer.addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        champ.value =
+          champ.value.slice(0,-1);
+
+        champ.focus();
+      }
+    );
+  }
+
+  const toutEffacer =
+    document.getElementById(
+      "toutEffacerEmailClavier"
+    );
+
+  if (toutEffacer) {
+
+    toutEffacer.addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        champ.value =
+          "";
+
+        champ.focus();
+      }
+    );
+  }
+
+  boutonValider.addEventListener(
+    "click",
+    async event => {
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      await validerEmailAvecClavier();
+    }
+  );
+
+  champ.addEventListener(
+    "keydown",
+    async event => {
+
+      if (
+        event.key ===
+        "Enter"
+      ) {
+
+        event.preventDefault();
+
+        await validerEmailAvecClavier();
+      }
+    }
+  );
+
+  console.log(
+    "✅ Clavier e-mail initialisé avec touche VALIDER."
+  );
+}
+
+
+/* =========================================================
+   RENDEZ-VOUS
+========================================================= */
+
+function estOui(texte) {
+
+  const q =
+    normaliser(texte);
+
+  return (
+    /^(oui|ouais|yes|d accord|daccord|exact|exactement|correct|c est ca|cest ca)$/.test(q)
+    ||
+    /\b(oui|ouais|yes)\b/.test(q)
+  );
+}
+
+function estNon(texte) {
+
+  const q =
+    normaliser(texte);
+
+  return (
+    /^(non|no|pas du tout|incorrect|ce n est pas ca|ce nest pas ca)$/.test(q)
+    ||
+    /\b(non|no)\b/.test(q)
+  );
+}
+
+function annulerRendezVous() {
+
+  reinitialiserRendezVous();
+
+  attenteQuestion = false;
+  traitementQuestion = false;
+  conversationActive = true;
+
+  etat.textContent =
+    "🛑 D'accord, la prise de rendez-vous est annulée. Je vous écoute...";
+
+  signalerInteraction();
+
+  if (reconnaissance) {
+
+    try {
+      reconnaissance.stop();
+    } catch (erreur) {}
+  }
+
+  if (modeVeille) {
+    setTimeout(
+      demarrerEcoute,
+      400
+    );
+  }
+}
+
+async function demarrerRendezVous(reponse) {
+
+  rendezVousActif = true;
+  rendezVousEtape = "date";
+
+  rendezVousDonnees = {
+    date: "",
+    heure: "",
+    nom: "",
+    email: "",
+    motif: ""
+  };
+
+  attenteQuestion = false;
+  traitementQuestion = true;
+  conversationActive = true;
+
+  attenteMorceauBobMarley =
+    false;
+
+  signalerInteraction();
+
+  if (reconnaissance) {
+    try {
+      reconnaissance.stop();
+    } catch (erreur) {}
+  }
+
+  arreterMusique();
+
+  try {
+
+    await jouerVideo(
+      reponse.video ||
+      "videos/rendez-vous.mp4"
+    );
+
+  } catch (erreur) {
+
+    console.warn(
+      "⚠️ Vidéo rendez-vous indisponible.",
+      erreur
+    );
+  }
+
+  traitementQuestion =
+    false;
+
+  etat.textContent =
+    "📅 Je vous écoute. Dites la date souhaitée.";
+
+  if (modeVeille) {
+    setTimeout(
+      demarrerEcoute,
+      400
+    );
+  }
+}
+
+async function traiterEtapeRendezVous(
+  resultat
+) {
+
+  if (
+    !rendezVousActif ||
+    traitementQuestion
+  ) {
+    return;
+  }
+
+  const reponseUtilisateur =
+    String(resultat || "").trim();
+
+  if (!reponseUtilisateur) {
+    return;
+  }
+
+  traitementQuestion =
+    true;
+
+  signalerInteraction();
+
+  if (reconnaissance) {
+    try {
+      reconnaissance.stop();
+    } catch (erreur) {}
+  }
+
+  try {
+
+    if (
+      rendezVousEtape ===
+      "date"
+    ) {
+
+      rendezVousDonnees.date =
+        reponseUtilisateur;
+
+      rendezVousEtape =
+        "heure";
+
+      await jouerVideo(
+        "videos/rendez-vous-heure.mp4"
+      );
+
+      traitementQuestion =
+        false;
+
+      etat.textContent =
+        "🕐 Je vous écoute. Dites l'heure souhaitée.";
+
+    }
+
+    else if (
+      rendezVousEtape ===
+      "heure"
+    ) {
+
+      rendezVousDonnees.heure =
+        reponseUtilisateur;
+
+      rendezVousEtape =
+        "nom";
+
+      await jouerVideo(
+        "videos/rendez-vous-nom.mp4"
+      );
+
+      traitementQuestion =
+        false;
+
+      etat.textContent =
+        "👤 Je vous écoute. Dites votre nom.";
+
+    }
+
+    else if (
+      rendezVousEtape ===
+      "nom"
+    ) {
+
+      rendezVousDonnees.nom =
+        reponseUtilisateur;
+
+      rendezVousEtape =
+        "motif";
+
+      await jouerVideo(
+        "videos/rendez-vous-motif.mp4"
+      );
+
+      traitementQuestion =
+        false;
+
+      etat.textContent =
+        "📝 Je vous écoute. Dites-moi le motif du rendez-vous.";
+
+    }
+
+    else if (
+      rendezVousEtape ===
+      "motif"
+    ) {
+
+      rendezVousDonnees.motif =
+        reponseUtilisateur;
+
+      rendezVousEtape =
+        "email";
+
+      await jouerVideo(
+        "videos/rendez-vous-email.mp4"
+      );
+
+      traitementQuestion =
+        false;
+
+      etat.textContent =
+        "📧 Je vous écoute. Dites votre adresse e-mail.";
+
+    }
+
+    else if (
+      rendezVousEtape ===
+      "email"
+    ) {
+
+      const email =
+        normaliserEmailVocal(
+          reponseUtilisateur
+        );
+
+      if (!emailValide(email)) {
+
+        traitementQuestion =
+          false;
+
+        etat.textContent =
+          "⚠️ Je n'ai pas bien compris l'adresse e-mail. Dites-la à nouveau.";
+
+        return;
+      }
+
+      rendezVousDonnees.email =
+        email;
+
+      rendezVousEmailEnAttente =
+        email;
+
+      rendezVousConfirmationEmail =
+        1;
+
+      rendezVousEtape =
+        "confirmationEmail";
+
+      afficherEmailConfirmation(
+        email
+      );
+
+      await jouerVideo(
+        "videos/rendez-vous-email-confirmation.mp4"
+      );
+
+      afficherEmailConfirmation(
+        email
+      );
+
+      traitementQuestion =
+        false;
+
+      etat.textContent =
+        "📧 Je vous écoute. Dites oui ou non.";
+
+    }
+
+    else if (
+      rendezVousEtape ===
+      "confirmationEmail"
+    ) {
+
+      const oui =
+        estOui(
+          reponseUtilisateur
+        );
+
+      const non =
+        estNon(
+          reponseUtilisateur
+        );
+
+      if (oui) {
+
+        rendezVousDonnees.email =
+          rendezVousEmailEnAttente;
+
+        rendezVousEtape =
+          "confirmationFinale";
+
+        cacherEmailConfirmation();
+
+        await envoyerRendezVous();
+
+        return;
+      }
+
+      if (
+        non &&
+        rendezVousConfirmationEmail === 1
+      ) {
+
+        rendezVousConfirmationEmail =
+          2;
+
+        rendezVousEtape =
+          "emailEpeler";
+
+        cacherEmailConfirmation();
+
+        await jouerVideo(
+          "videos/rendez-vous-email-epeler.mp4"
+        );
+
+        traitementQuestion =
+          false;
+
+        etat.textContent =
+          "📧 Je vous écoute. Épelez votre adresse e-mail.";
+
+        return;
+      }
+
+      if (
+        non &&
+        rendezVousConfirmationEmail >= 2
+      ) {
+
+        rendezVousConfirmationEmail =
+          3;
+
+        rendezVousEtape =
+          "emailClavier";
+
+        cacherEmailConfirmation();
+
+        await jouerVideo(
+          "videos/rendez-vous-email-clavier.mp4"
+        );
+
+        afficherClavierEmail();
+
+        traitementQuestion =
+          false;
+
+        etat.textContent =
+          "⌨️ Écrivez votre adresse e-mail avec le clavier à l'écran.";
+
+        return;
+      }
+
+      traitementQuestion =
+        false;
+
+      etat.textContent =
+        "⚠️ Dites simplement oui ou non.";
+
+    }
+
+    else if (
+      rendezVousEtape ===
+      "emailEpeler"
+    ) {
+
+      const email =
+        convertirEpellationEnEmail(
+          reponseUtilisateur
+        );
+
+      if (!emailValide(email)) {
+
+        traitementQuestion =
+          false;
+
+        etat.textContent =
+          "⚠️ Je n'ai pas bien compris l'adresse épelée. Épelez-la à nouveau.";
+
+        return;
+      }
+
+      rendezVousDonnees.email =
+        email;
+
+      rendezVousEmailEnAttente =
+        email;
+
+      rendezVousConfirmationEmail =
+        2;
+
+      rendezVousEtape =
+        "confirmationEmail";
+
+      afficherEmailConfirmation(
+        email
+      );
+
+      await jouerVideo(
+        "videos/rendez-vous-email-confirmation-2.mp4"
+      );
+
+      afficherEmailConfirmation(
+        email
+      );
+
+      traitementQuestion =
+        false;
+
+      etat.textContent =
+        "📧 Je vous écoute. Dites oui ou non.";
+    }
+
+  } catch (erreur) {
+
+    console.error(
+      "❌ Étape rendez-vous :",
+      erreur
+    );
+
+    traitementQuestion =
+      false;
+
+    cacherEmailConfirmation();
+    cacherClavierEmail();
+
+    etat.textContent =
+      "⚠️ Je n'ai pas pu lire la vidéo suivante.";
+
+    reinitialiserRendezVous();
+  }
+
+  if (
+    modeVeille &&
+    !traitementQuestion &&
+    rendezVousActif &&
+    rendezVousEtape !==
+    "emailClavier"
+  ) {
+
+    setTimeout(
+      demarrerEcoute,
+      400
+    );
+  }
+}
+
+
+/* =========================================================
+   ENVOI RENDEZ-VOUS
+========================================================= */
+
+async function envoyerRendezVous() {
+
+  traitementQuestion =
+    true;
+
+  if (reconnaissance) {
+    try {
+      reconnaissance.stop();
+    } catch (erreur) {}
+  }
+
+  etat.textContent =
+    "📨 Enregistrement de votre demande de rendez-vous...";
+
+  try {
+
+    const reponse =
+      await fetch(
+        "/api/rendez-vous",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+          body:
+            JSON.stringify(
+              rendezVousDonnees
+            )
+        }
+      );
+
+    const resultat =
+      await reponse.json();
+
+    if (
+      !reponse.ok ||
+      !resultat.ok
+    ) {
+      throw new Error(
+        resultat.message ||
+        "Le serveur a refusé la demande."
+      );
+    }
+
+    rendezVousActif =
+      false;
+
+    rendezVousEtape =
+      null;
+
+    cacherEmailConfirmation();
+    cacherClavierEmail();
+
+    try {
+
+      await jouerVideo(
+        "videos/rendez-vous-confirmation.mp4"
+      );
+
+    } catch (erreur) {
+
+      console.warn(
+        "⚠️ Vidéo confirmation indisponible.",
+        erreur
+      );
+
+      etat.textContent =
+        "✅ Votre demande de rendez-vous a bien été enregistrée.";
+    }
+
+    traitementQuestion =
+      false;
+
+    conversationActive =
+      true;
+
+    signalerInteraction();
+
+    if (modeVeille) {
+
+      setTimeout(
+        demarrerEcoute,
+        500
+      );
+    }
+
+  } catch (erreur) {
+
+    console.error(
+      "❌ Rendez-vous :",
+      erreur
+    );
+
+    traitementQuestion =
+      false;
+
+    etat.textContent =
+      "⚠️ Impossible d'enregistrer le rendez-vous.";
+
+    reinitialiserRendezVous();
+
+    conversationActive =
+      true;
+
+    if (modeVeille) {
+      setTimeout(
+        demarrerEcoute,
+        800
+      );
+    }
+  }
+}
+
+
+/* =========================================================
+   CARROUSEL 3D SERVICES
+========================================================= */
+
+function rendreCarrouselServices() {
+
+  if (!servicesScene) return;
+
+  servicesScene.innerHTML = "";
+
+  servicesRoles.forEach(role => {
+
+    const carte =
+      document.createElement("div");
+
+    carte.className =
+      "servicesCarte";
+
+    const img =
+      document.createElement("img");
+
+    img.src =
+      role.image;
+
+    img.alt =
+      role.nom;
+
+    const nom =
+      document.createElement("div");
+
+    nom.className =
+      "servicesNom";
+
+    nom.textContent =
+      role.nom;
+
+    carte.appendChild(img);
+    carte.appendChild(nom);
+
+    servicesScene.appendChild(carte);
+  });
+
+  positionnerCarrouselServices();
+}
+
+
+function positionnerCarrouselServices() {
+
+  if (!servicesScene) return;
+
+  const cartes =
+    servicesScene.querySelectorAll(
+      ".servicesCarte"
+    );
+
+  const total =
+    servicesRoles.length;
+
+  const angle =
+    360 / total;
+
+  cartes.forEach(
+    (carte,index) => {
+
+      const position =
+        (index -
+          servicesCarouselIndex +
+          total) %
+        total;
+
+      const rotation =
+        position * angle;
+
+      const radians =
+        rotation *
+        Math.PI /
+        180;
+
+      const x =
+        Math.sin(radians) *
+        105;
+
+      const z =
+        Math.cos(radians) *
+        75;
+
+      const scale =
+        0.72 +
+        ((z + 75) / 150) *
+        0.28;
+
+      const opacity =
+        0.42 +
+        ((z + 75) / 150) *
+        0.58;
+
+      carte.style.transform =
+        `translate(-50%,-50%) translate3d(${x}px,0,${z}px) rotateY(${rotation}deg) scale(${scale})`;
+
+      carte.style.opacity =
+        opacity;
+
+      carte.style.zIndex =
+        Math.round(z + 100);
+
+      carte.style.filter =
+        position === 0
+          ? "none"
+          : "brightness(.72)";
+    }
+  );
+}
+
+
+function arreterVideosServices() {
+
+  servicesVideoEnCours =
+    false;
+
+  if (!servicesScene) return;
+
+  servicesScene
+    .querySelectorAll("video")
+    .forEach(
+      video => {
+
+        try {
+
+          video.onended =
+            null;
+
+          video.onerror =
+            null;
+
+          video.pause();
+
+          video.currentTime =
+            0;
+
+        } catch (erreur) {}
+
+        video.style.display =
+          "none";
+
+        video.removeAttribute(
+          "src"
+        );
+
+        video.load();
+      }
+    );
+
+  servicesScene
+    .querySelectorAll(
+      ".servicesCarte"
+    )
+    .forEach(
+      carte => {
+
+        const image =
+          carte.querySelector("img");
+
+        const nom =
+          carte.querySelector(
+            ".servicesNom"
+          );
+
+        if (image)
+          image.style.display =
+            "block";
+
+        if (nom)
+          nom.style.display =
+            "block";
+      }
+    );
+}
+
+
+function fermerCarrouselServices() {
+
+  if (servicesCarouselTimer) {
+
+    clearInterval(
+      servicesCarouselTimer
+    );
+
+    servicesCarouselTimer =
+      null;
+  }
+
+  servicesCarouselActif =
+    false;
+
+  arreterVideosServices();
+
+  servicesRoleSelectionne =
+    null;
+
+  if (servicesCarousel) {
+
+    servicesCarousel.classList.remove(
+      "actif"
+    );
+
+    servicesCarousel.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+  }
+
+  if (servicesCommandes) {
+
+    servicesCommandes.classList.remove(
+      "actif"
+    );
+
+    servicesCommandes.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+  }
+
+  if (servicesControle) {
+
+    servicesControle.textContent =
+      "Dites « stop » pour choisir";
+  }
+}
+
+
+function demarrerCarrouselServices() {
+
+  arreterVideosServices();
+
+  arreterCarrouselServices(false);
+
+  servicesCarouselActif =
+    true;
+
+  servicesRoleSelectionne =
+    null;
+
+  servicesCarouselIndex =
+    0;
+
+  servicesCarousel.classList.add(
+    "actif"
+  );
+
+  servicesCarousel.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  if (servicesCommandes) {
+
+    servicesCommandes.classList.add(
+      "actif"
+    );
+
+    servicesCommandes.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+  }
+
+  servicesControle.textContent =
+    "Dites « stop » pour choisir";
+
+  rendreCarrouselServices();
+
+  servicesCarouselTimer =
+    setInterval(
+      () => {
+
+        if (!servicesCarouselActif)
+          return;
+
+        servicesCarouselIndex =
+          (servicesCarouselIndex + 1) %
+          servicesRoles.length;
+
+        positionnerCarrouselServices();
+
+      },
+      1200
+    );
+}
+
+
+function arreterCarrouselServices(
+  jouerRole = true
+) {
+
+  if (!servicesCarouselActif)
+    return false;
+
+  servicesCarouselActif =
+    false;
+
+  if (servicesCarouselTimer) {
+
+    clearInterval(
+      servicesCarouselTimer
+    );
+
+    servicesCarouselTimer =
+      null;
+  }
+
+  servicesRoleSelectionne =
+    servicesRoles[
+      servicesCarouselIndex
+    ];
+
+  positionnerCarrouselServices();
+
+  servicesControle.textContent =
+    "✓ " +
+    servicesRoleSelectionne.nom;
+
+  if (jouerRole) {
+
+    jouerVideoRoleService(
+      servicesRoleSelectionne
+    );
+  }
+
+  return true;
+}
+
+
+function jouerVideoRoleService(role) {
+
+  if (!role || !servicesScene)
+    return;
+
+  const cartes =
+    servicesScene.querySelectorAll(
+      ".servicesCarte"
+    );
+
+  const carte =
+    cartes[servicesCarouselIndex];
+
+  if (!carte)
+    return;
+
+  const ancienneImage =
+    carte.querySelector("img");
+
+  const ancienNom =
+    carte.querySelector(
+      ".servicesNom"
+    );
+
+  /* La carte sélectionnée s'agrandit dès que sa vidéo démarre.
+     On conserve exactement sa position 3D et on ajoute seulement
+     un facteur d'agrandissement à la transformation existante. */
+  const transformationNormale = carte.style.transform;
+  carte.dataset.transformNormale = transformationNormale;
+  carte.style.transform = transformationNormale + " scale(1.35)";
+  carte.style.zIndex = "1000";
+
+  if (ancienneImage)
+    ancienneImage.style.display =
+      "none";
+
+  if (ancienNom)
+    ancienNom.style.display =
+      "none";
+
+  let video =
+    carte.querySelector("video");
+
+  if (!video) {
+
+    video =
+      document.createElement(
+        "video"
+      );
+
+    video.playsInline =
+      true;
+
+    video.preload =
+      "auto";
+
+    video.controls =
+      false;
+
+    video.className =
+      "carrouselVideo";
+
+    carte.insertBefore(
+      video,
+      carte.firstChild
+    );
+  }
+
+  /*
+     =====================================================
+     PROTECTION RECONNAISSANCE VOCALE
+
+     Dès que la vidéo du carrousel démarre, on bloque
+     complètement les résultats de reconnaissance vocale.
+     Même un résultat déjà en attente sera ignoré.
+     =====================================================
+  */
+
+  servicesVideoEnCours =
+    true;
+
+  ecouteSuspendueParVideoService =
+    true;
+
+  blocageResultatsService =
+    true;
+
+  // Les résultats vocaux provenant de la vidéo restent interdits
+  // pendant toute la vidéo et encore un court délai après sa fin.
+  resultatsServiceInterditsJusqua =
+    Date.now() + 2500;
+
+  traitementQuestion =
+    true;
+
+  attenteQuestion =
+    false;
+
+  conversationActive =
+    false;
+
+  if (reconnaissance) {
+
+    try {
+      reconnaissance.stop();
+    } catch (erreur) {}
+  }
+
+  video.src =
+    role.video;
+
+  video.style.display =
+    "block";
+
+  video.load();
+
+  video.onended =
+    () => {
+
+      servicesVideoEnCours =
+        false;
+
+      ecouteSuspendueParVideoService =
+        false;
+
+      video.style.display =
+        "none";
+
+      /* Retour à la taille normale après la fin de la vidéo. */
+      if (carte.dataset.transformNormale) {
+        carte.style.transform = carte.dataset.transformNormale;
+        delete carte.dataset.transformNormale;
+      }
+
+      if (ancienneImage)
+        ancienneImage.style.display =
+          "block";
+
+      if (ancienNom)
+        ancienNom.style.display =
+          "block";
+
+      servicesControle.textContent =
+        "✓ " +
+        role.nom;
+
+      traitementQuestion =
+        false;
+
+      conversationActive =
+        true;
+
+      etat.textContent =
+        "👂 Je vous écoute...";
+
+      signalerInteraction();
+
+      /*
+         On garde le blocage pendant 900 ms.
+         Cela permet d'éliminer les éventuels résultats
+         vocaux encore en attente après l'arrêt de la vidéo.
+      */
+
+      setTimeout(
+        () => {
+
+          blocageResultatsService =
+            false;
+
+          if (
+            modeVeille &&
+            !modeSommeil &&
+            !servicesVideoEnCours &&
+            !ecouteSuspendueParVideoService &&
+            !traitementQuestion
+          ) {
+
+            demarrerEcoute();
+          }
+
+        },
+        2500
+      );
+    };
+
+  video.onerror =
+    () => {
+
+      servicesVideoEnCours =
+        false;
+
+      ecouteSuspendueParVideoService =
+        false;
+
+      video.style.display =
+        "none";
+
+      if (ancienneImage)
+        ancienneImage.style.display =
+          "block";
+
+      if (ancienNom)
+        ancienNom.style.display =
+          "block";
+
+      traitementQuestion =
+        false;
+
+      conversationActive =
+        true;
+
+      etat.textContent =
+        "⚠️ La vidéo de ce service n'a pas pu être lue.";
+
+      /*
+         Même en cas d'erreur, on garde le blocage
+         quelques instants pour éviter un ancien résultat
+         de reconnaissance vocale.
+      */
+
+      setTimeout(
+        () => {
+
+          blocageResultatsService =
+            false;
+
+          if (
+            modeVeille &&
+            !modeSommeil &&
+            !traitementQuestion
+          ) {
+
+            demarrerEcoute();
+          }
+
+        },
+        2500
+      );
+    };
+
+  video.play()
+    .catch(
+      () => {
+        video.onerror();
+      }
+    );
+}
+
+
+function estDemandeServices(question) {
+
+  const q =
+    normaliser(question);
+
+  return (
+    (
+      q.includes("quel service") ||
+      q.includes("quels services") ||
+      q.includes("dans quel service") ||
+      q.includes("dans quels services")
+    ) &&
+    (
+      q.includes("utilise") ||
+      q.includes("utilisee") ||
+      q.includes("utiliser") ||
+      q.includes("travailler") ||
+      q.includes("etre utilisee")
+    )
+  ) ||
+  q.includes("differents services") ||
+  q.includes("les services dans lesquels") ||
+  q.includes(
+    "services est ce que tu peux etre"
+  );
+}
+
+
+function estQuestionSurServiceSelectionne(
+  question
+) {
+
+  if (!servicesRoleSelectionne)
+    return false;
+
+  const q =
+    normaliser(question);
+
+  return (
+    q.includes("ce service") ||
+    q.includes("ce role") ||
+    q.includes("ce métier") ||
+    q.includes("ce metier") ||
+    q.includes("ce poste") ||
+    q.includes("que peux tu faire") ||
+    q.includes("que peux tu faire dans") ||
+    q.includes("parle moi de") ||
+    q.includes("explique") ||
+    q.includes("presente moi")
+  );
+}
+
+
+/* =========================================================
+   RECHERCHE RÉPONSE
+========================================================= */
+
+function trouverReponse(question) {
+
+  if (
+    !connaissances ||
+    !Array.isArray(
+      connaissances.reponses
+    )
+  ) {
+    return null;
+  }
+
+  const questionNormalisee =
+    normaliser(question);
+
+  if (
+    estDemandeServices(
+      questionNormalisee
+    )
+  ) {
+
+    return {
+      id: "services",
+      type: "services",
+      video: "videos/services.mp4",
+      texte:
+        "Bien sûr, voici les différents services."
+    };
+  }
+
+  const rendezVous =
+    trouverDemandeRendezVous(
+      questionNormalisee
+    );
+
+  if (rendezVous) {
+    return rendezVous;
+  }
+
+  const musique =
+    trouverMusique(
+      questionNormalisee
+    );
+
+  if (musique) {
+    return musique;
+  }
+
+  const fable =
+    trouverFable(
+      questionNormalisee
+    );
+
+  if (fable) {
+    return fable;
+  }
+
+  let meilleureReponse =
+    null;
+
+  let meilleurScore =
+    0;
+
+  for (
+    const reponse
+    of connaissances.reponses
+  ) {
+
+    if (
+      !Array.isArray(
+        reponse.mots_cles
+      )
+    ) {
+      continue;
+    }
+
+    let score =
+      0;
+
+    if (
+      reponse.question &&
+      normaliser(
+        reponse.question
+      ) === questionNormalisee
+    ) {
+
+      score += 1000;
+    }
+
+    for (
+      const motCle
+      of reponse.mots_cles
+    ) {
+
+      if (!motCle) {
+        continue;
+      }
+
+      const motCleNormalise =
+        normaliser(motCle);
+
+      if (!motCleNormalise) {
+        continue;
+      }
+
+      const nombreMots =
+        motCleNormalise
+          .split(" ")
+          .filter(Boolean)
+          .length;
+
+      if (
+        questionNormalisee ===
+        motCleNormalise
+      ) {
+
+        score +=
+          1000 +
+          nombreMots * 100;
+
+      } else if (
+        contientExpression(
+          questionNormalisee,
+          motCleNormalise
+        )
+      ) {
+
+        score +=
+          100 +
+          nombreMots * 30 +
+          Math.min(
+            motCleNormalise.length,
+            50
+          );
+      }
+    }
+
+    if (
+      score > meilleurScore
+    ) {
+
+      meilleurScore =
+        score;
+
+      meilleureReponse =
+        reponse;
+    }
+  }
+
+  return meilleureReponse;
+}
+
+
+function trouverReponseParDefaut() {
+
+  if (
+    !connaissances ||
+    !Array.isArray(
+      connaissances.reponses
+    )
+  ) {
+    return null;
+  }
+
+  return connaissances.reponses.find(
+    reponse =>
+      reponse.id ===
+      "reponse_par_defaut" ||
+      reponse.categorie ===
+      "defaut"
+  );
+}
+
+
+/* =========================================================
+   MUSIQUE
+========================================================= */
+
+function arreterMusique() {
+
+  if (!lecteurAudio) {
+    return;
+  }
+
+  lecteurAudio.pause();
+
+  lecteurAudio.currentTime =
+    0;
+
+  lecteurAudio.removeAttribute(
+    "src"
+  );
+
+  lecteurAudio.load();
+
+  musiqueEnCours =
+    false;
+  audioLectureEnCours = false;
+}
+
+
+function stopMusiqueEtRetourEcoute() {
+
+  arreterMusique();
+
+  imageSupplementaire.style.display =
+    "none";
+
+  imageSupplementaire.removeAttribute(
+    "src"
+  );
+
+  attenteMorceauBobMarley =
+    false;
+
+  conversationActive =
+    true;
+
+  attenteQuestion =
+    false;
+
+  traitementQuestion =
+    false;
+
+  signalerInteraction();
+
+  etat.textContent =
+    "👂 Sophia vous écoute...";
+
+  if (reconnaissance) {
+    try {
+      reconnaissance.stop();
+    } catch (erreur) {}
+  }
+
+  if (modeVeille) {
+    setTimeout(
+      demarrerEcoute,
+      400
+    );
+  }
+}
+
+
+function jouerMusique(
+  cheminAudio,
+  cheminImage,
+  texteEtat
+) {
+
+  return new Promise(
+    (resolve,reject) => {
+
+      if (!cheminAudio) {
+        reject(
+          new Error(
+            "Aucun fichier audio indiqué."
+          )
+        );
+        return;
+      }
+
+      arreterMusique();
+
+      audioLectureEnCours = true;
+
+      // Garder l'écoute vocale active pendant le MP3 pour permettre « arrête la musique ».
+
+      if (nettoyageVideoActuelle) {
+
+        nettoyageVideoActuelle();
+
+        nettoyageVideoActuelle =
+          null;
+      }
+
+      videoAvatar.pause();
+
+      videoAvatar.removeAttribute(
+        "src"
+      );
+
+      videoAvatar.load();
+
+      videoAvatar.style.opacity =
+        "0";
+
+      imageAvatar.style.opacity =
+        "1";
+
+      if (cheminImage) {
+
+        imageSupplementaire.src =
+          cheminImage;
+
+        imageSupplementaire.style.display =
+          "block";
+      }
+
+      lecteurAudio.src =
+        cheminAudio;
+
+      musiqueEnCours =
+        true;
+
+      etat.textContent =
+        texteEtat ||
+        "🎵 Lecture en cours...";
+
+      const finMusique =
+        () => {
+
+          musiqueEnCours =
+            false;
+          audioLectureEnCours = false;
+
+          lecteurAudio.removeEventListener(
+            "ended",
+            finMusique
+          );
+
+          imageSupplementaire.style.display =
+            "none";
+
+          imageSupplementaire.removeAttribute(
+            "src"
+          );
+
+          etat.textContent =
+            "🎵 Musique terminée.";
+
+          signalerInteraction();
+
+          if (modeVeille) {
+
+            setTimeout(
+              demarrerEcoute,
+              500
+            );
+          }
+
+          resolve();
+        };
+
+      lecteurAudio.addEventListener(
+        "ended",
+        finMusique
+      );
+
+      lecteurAudio
+        .play()
+        .catch(
+          erreur => {
+
+            musiqueEnCours =
+              false;
+            audioLectureEnCours = false;
+
+            console.error(
+              "❌ Erreur audio :",
+              erreur
+            );
+
+            reject(erreur);
+          }
+        );
+    }
+  );
+}
+
+
+/* =========================================================
+   AVATAR
+========================================================= */
+
+function afficherImageAvatar() {
+
+  videoAvatar.pause();
+
+  videoAvatar.style.opacity =
+    "0";
+
+  imageAvatar.style.opacity =
+    "1";
+
+  imageAvatar.style.zIndex =
+    "2";
+
+  videoAvatar.style.zIndex =
+    "1";
+}
+
+
+/* =========================================================
+   JOUER VIDÉO
+========================================================= */
+
+function jouerVideo(
+  cheminVideo,
+  auDemarrage = null
+) {
+
+  return new Promise(
+    (resolve,reject) => {
+
+      if (!cheminVideo) {
+
+        reject(
+          new Error(
+            "Aucune vidéo indiquée."
+          )
+        );
+
+        return;
+      }
+
+      arreterMusique();
+
+      if (nettoyageVideoActuelle) {
+
+        nettoyageVideoActuelle();
+
+        nettoyageVideoActuelle =
+          null;
+      }
+
+      videoAvatar.pause();
+
+      videoAvatar.removeAttribute(
+        "src"
+      );
+
+      videoAvatar.load();
+
+      videoAvatar.src =
+        cheminVideo;
+
+      videoAvatar.preload =
+        "auto";
+
+      videoEnPause =
+        false;
+
+      let fini =
+        false;
+
+      let timeout =
+        null;
+
+      const nettoyage =
+        () => {
+
+          videoAvatar.removeEventListener(
+            "canplay",
+            prete
+          );
+
+          videoAvatar.removeEventListener(
+            "loadeddata",
+            prete
+          );
+
+          videoAvatar.removeEventListener(
+            "error",
+            erreurVideo
+          );
+
+          videoAvatar.removeEventListener(
+            "ended",
+            finVideo
+          );
+
+          if (timeout) {
+
+            clearTimeout(timeout);
+
+            timeout =
+              null;
+          }
+
+          if (
+            nettoyageVideoActuelle ===
+            nettoyage
+          ) {
+
+            nettoyageVideoActuelle =
+              null;
+          }
+        };
+
+      nettoyageVideoActuelle =
+        nettoyage;
+
+      const finVideo =
+        () => {
+
+          if (fini) {
+            return;
+          }
+
+          fini =
+            true;
+
+          nettoyage();
+
+          /*
+             Fondu enchaîné : l'image PNG reste derrière la vidéo.
+             La vidéo disparaît progressivement, révélant l'image fixe.
+          */
+          imageAvatar.style.zIndex = "1";
+          videoAvatar.style.zIndex = "2";
+          imageAvatar.style.opacity = "1";
+          videoAvatar.style.opacity = "0";
+
+          // On attend la fin du fondu avant de terminer la fonction.
+          setTimeout(() => {
+            videoAvatar.pause();
+            videoAvatar.style.zIndex = "1";
+            imageAvatar.style.zIndex = "2";
+            resolve();
+          }, 650);
+        };
+
+      const erreurVideo =
+        erreur => {
+
+          if (fini) {
+            return;
+          }
+
+          fini =
+            true;
+
+          nettoyage();
+
+          afficherImageAvatar();
+
+          console.error(
+            "❌ Erreur vidéo :",
+            erreur
+          );
+
+          reject(erreur);
+        };
+
+      const prete =
+        async () => {
+
+          if (fini) {
+            return;
+          }
+
+          try {
+
+            videoAvatar.style.zIndex =
+              "2";
+
+            imageAvatar.style.zIndex =
+              "1";
+
+            videoAvatar.style.opacity =
+              "1";
+
+            etat.textContent =
+              "🎬 Sophia vous répond...";
+
+            await videoAvatar.play();
+
+            if (
+              typeof auDemarrage ===
+              "function"
+            ) {
+
+              try {
+
+                auDemarrage();
+
+              } catch (erreur) {
+
+                console.warn(
+                  "⚠️ Action au démarrage vidéo :",
+                  erreur
+                );
+              }
+            }
+
+            if (timeout) {
+
+              clearTimeout(timeout);
+
+              timeout =
+                null;
+            }
+
+          } catch (erreur) {
+
+            erreurVideo(erreur);
+          }
+        };
+
+      videoAvatar.addEventListener(
+        "canplay",
+        prete
+      );
+
+      videoAvatar.addEventListener(
+        "loadeddata",
+        prete
+      );
+
+      videoAvatar.addEventListener(
+        "error",
+        erreurVideo
+      );
+
+      videoAvatar.addEventListener(
+        "ended",
+        finVideo
+      );
+
+      timeout =
+        setTimeout(
+          () => {
+
+            if (
+              !fini &&
+              videoAvatar.paused
+            ) {
+
+              erreurVideo(
+                new Error(
+                  "Délai de chargement dépassé."
+                )
+              );
+            }
+
+          },
+          30000
+        );
+
+      videoAvatar.load();
+    }
+  );
+}
+
+
+/* =========================================================
+   FIN VIDÉO
+========================================================= */
+
+videoAvatar.addEventListener(
+  "ended",
+  () => {
+
+    traitementQuestion =
+      false;
+
+    attenteQuestion =
+      false;
+
+    imageSupplementaire.style.display =
+      "none";
+
+    imageSupplementaire.removeAttribute(
+      "src"
+    );
+
+    if (lectureBonjour) {
+
+      lectureBonjour =
+        false;
+
+      conversationActive =
+        true;
+
+      etat.textContent =
+        "👂 Je vous écoute...";
+
+      signalerInteraction();
+
+      if (modeVeille) {
+
+        setTimeout(
+          demarrerEcoute,
+          500
+        );
+      }
+
+      return;
+    }
+
+    if (attenteMorceauBobMarley) {
+
+      conversationActive =
+        true;
+
+      etat.textContent =
+        "🎵 Quel morceau de Bob Marley veux-tu écouter ?";
+
+      signalerInteraction();
+
+      if (modeVeille) {
+
+        setTimeout(
+          demarrerEcoute,
+          500
+        );
+      }
+
+      return;
+    }
+
+    if (
+      modeVeille &&
+      conversationActive
+    ) {
+
+      etat.textContent =
+        "👂 Je vous écoute...";
+
+      signalerInteraction();
+
+      setTimeout(
+        demarrerEcoute,
+        500
+      );
+
+      return;
+    }
+  }
+);
+
+
+/* =========================================================
+   RECONNAISSANCE VOCALE
+========================================================= */
+
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+
+if (SpeechRecognition) {
+
+  reconnaissance =
+    new SpeechRecognition();
+
+  reconnaissance.lang =
+    "fr-FR";
+
+  reconnaissance.continuous =
+    true;
+
+  reconnaissance.interimResults =
+    true;
+
+  reconnaissance.maxAlternatives =
+    5;
+
+
+  reconnaissance.onstart =
+    () => {
+
+      reconnaissanceActive =
+        true;
+
+      /*
+         Sécurité supplémentaire :
+         si une reconnaissance démarre accidentellement
+         pendant une vidéo de service, on ne l'utilise pas.
+      */
+
+      if (
+        servicesVideoEnCours ||
+        ecouteSuspendueParVideoService ||
+        blocageResultatsService ||
+        Date.now() < resultatsServiceInterditsJusqua
+      ) {
+
+        try {
+          reconnaissance.stop();
+        } catch (erreur) {}
+
+        return;
+      }
+
+      if (modeSommeil) {
+
+        etat.textContent =
+          "😴 Sophia est en veille... Dites « Sophia ».";
+
+      } else {
+
+        etat.textContent =
+          attenteMorceauBobMarley
+            ? "🎵 Dites le nom du morceau..."
+            : "👂 Je vous écoute...";
+      }
+    };
+
+
+  reconnaissance.onresult =
+    async event => {
+
+      /*
+       =====================================================
+       COMMANDES MUSICALES PRIORITAIRES
+       Traitées AVANT les verrous vidéo/services : le résultat
+       vocal « stop » ne doit jamais être ignoré lorsque le
+       carrousel musical est affiché.
+       =====================================================
+      */
+      /*
+         COMMANDES MUSICALES PRIORITAIRES
+         - On lit aussi les résultats interim pour réagir vite à « stop ».
+         - Un verrou évite qu'interim + final du même « stop » sélectionnent
+           le morceau puis le coupent immédiatement.
+      */
+      let commandeMusicaleEntendue = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const phrase = (event.results[i][0].transcript || "").trim();
+        if (phrase) commandeMusicaleEntendue += " " + phrase;
+      }
+      commandeMusicaleEntendue = commandeMusicaleEntendue.trim();
+
+      if (commandeMusicaleEntendue) {
+        const maintenant = Date.now();
+
+        /* 1) Arrêt du carrousel musical → lance le MP3 affiché */
+        if (musicCarouselActif && estCommandeStopCarrousel(commandeMusicaleEntendue)) {
+          if (maintenant < verrouSelectionMusiqueJusqua) {
+            return;
+          }
+          console.log("🛑 Arrêt vocal du carrousel musical :", commandeMusicaleEntendue);
+          const arretEffectue = arreterCarrouselMusique(true);
+          traitementQuestion = false;
+          conversationActive = true;
+          if (!arretEffectue) {
+            etat.textContent = "⚠️ Impossible de sélectionner le morceau affiché.";
+          }
+          return;
+        }
+
+        /* 2) Arrêt d'un MP3 déjà en lecture (hors verrou de sélection) */
+        if (audioLectureEnCours && musiqueEnCours && estCommandeStop(commandeMusicaleEntendue)) {
+          if (maintenant < verrouSelectionMusiqueJusqua) {
+            console.log("🔇 Stop ignoré (verrou sélection musicale encore actif).");
+            return;
+          }
+          console.log("🛑 Arrêt vocal de la musique :", commandeMusicaleEntendue);
+          stopMusiqueEtRetourEcoute();
+          return;
+        }
+      }
+
+      // Pendant la lecture, ignorer les paroles du morceau : seule la commande stop passe.
+      if (audioLectureEnCours && musiqueEnCours) return;
+
+      if (
+        blocageResultatsService ||
+        servicesVideoEnCours ||
+        ecouteSuspendueParVideoService ||
+        Date.now() < resultatsServiceInterditsJusqua
+      ) {
+
+        console.log(
+          "🔇 Résultat vocal ignoré pendant/après une vidéo du carrousel."
+        );
+
+        return;
+      }
+
+
+      /*
+       =====================================================
+       STOP CARROUSEL ULTRA PRIORITAIRE
+       =====================================================
+      */
+
+      if (
+        servicesCarouselActif &&
+        !servicesVideoEnCours &&
+        !ecouteSuspendueParVideoService
+      ) {
+
+        for (
+          let i = event.resultIndex;
+          i < event.results.length;
+          i++
+        ) {
+
+          const texteReconnu =
+            event.results[i][0]
+              .transcript
+              .trim();
+
+          if (
+            estCommandeStopCarrousel(
+              texteReconnu
+            )
+          ) {
+
+            console.log(
+              "🛑 STOP CARROUSEL IMMÉDIAT :",
+              texteReconnu
+            );
+
+            arreterCarrouselServices(true);
+
+            traitementQuestion =
+              false;
+
+            conversationActive =
+              true;
+
+            etat.textContent =
+              "🎠 Service sélectionné : " +
+              servicesRoleSelectionne.nom;
+
+            try {
+              reconnaissance.stop();
+            } catch (erreur) {}
+
+            return;
+          }
+        }
+      }
+
+
+      let resultat =
+        "";
+
+      for (
+        let i =
+          event.resultIndex;
+        i <
+          event.results.length;
+        i++
+      ) {
+
+        if (
+          event.results[i].isFinal
+        ) {
+
+          resultat +=
+            " " +
+            event.results[i][0]
+              .transcript;
+        }
+      }
+
+      resultat =
+        resultat.trim();
+
+      if (!resultat) {
+        return;
+      }
+
+      console.log(
+        "🗣️ Reconnu :",
+        resultat
+      );
+
+
+      /* MODE SOMMEIL */
+
+      if (modeSommeil) {
+
+        if (
+          contientSophia(resultat)
+        ) {
+
+          await reveillerSophia();
+
+        } else {
+
+          console.log(
+            "😴 Sophia dort : parole ignorée."
+          );
+        }
+
+        return;
+      }
+
+
+      signalerInteraction();
+
+      if (
+        servicesVideoEnCours ||
+        ecouteSuspendueParVideoService ||
+        blocageResultatsService ||
+        Date.now() < resultatsServiceInterditsJusqua
+      ) {
+        return;
+      }
+
+
+      /* COMMANDES DU CARROUSEL MUSICAL */
+
+      if (
+        musicCarousel &&
+        musicCarousel.classList.contains("actif") &&
+        estCommandeFermerCarrousel(resultat)
+      ) {
+        fermerCarrouselMusique();
+        traitementQuestion = false;
+        conversationActive = true;
+        etat.textContent = "👂 Sophia vous écoute...";
+        if (modeVeille && !modeSommeil) setTimeout(demarrerEcoute, 300);
+        return;
+      }
+
+      if (
+        musicCarousel &&
+        musicCarousel.classList.contains("actif") &&
+        estCommandeRelanceCarrousel(resultat)
+      ) {
+        demarrerCarrouselMusique();
+        traitementQuestion = false;
+        conversationActive = true;
+        etat.textContent = "🎵 Les morceaux défilent... Dites « stop » pour écouter.";
+        return;
+      }
+
+      if (
+        musicCarouselActif &&
+        estCommandeStopCarrousel(resultat)
+      ) {
+        if (Date.now() < verrouSelectionMusiqueJusqua) {
+          return;
+        }
+        arreterCarrouselMusique(true);
+        traitementQuestion = false;
+        conversationActive = true;
+        return;
+      }
+
+      /* FERMER LE CARROUSEL */
+
+      if (
+        servicesCarousel &&
+        (
+          servicesCarouselActif ||
+          servicesCarousel.classList.contains(
+            "actif"
+          )
+        ) &&
+        estCommandeFermerCarrousel(
+          resultat
+        )
+      ) {
+
+        fermerCarrouselServices();
+
+        traitementQuestion =
+          false;
+
+        conversationActive =
+          true;
+
+        etat.textContent =
+          "👂 Sophia vous écoute...";
+
+        if (
+          modeVeille &&
+          !modeSommeil
+        ) {
+
+          setTimeout(
+            demarrerEcoute,
+            300
+          );
+        }
+
+        return;
+      }
+
+
+      /* RELANCE CARROUSEL */
+
+      if (
+        servicesCarousel &&
+        servicesCarousel.classList.contains(
+          "actif"
+        ) &&
+        estCommandeRelanceCarrousel(
+          resultat
+        )
+      ) {
+
+        demarrerCarrouselServices();
+
+        traitementQuestion =
+          false;
+
+        conversationActive =
+          true;
+
+        etat.textContent =
+          "🎠 Les services défilent... Dites « stop » pour choisir.";
+
+        return;
+      }
+
+
+      /* STOP CARROUSEL FINAL */
+
+      if (
+        servicesCarouselActif &&
+        estCommandeStopCarrousel(
+          resultat
+        )
+      ) {
+
+        arreterCarrouselServices(true);
+
+        traitementQuestion =
+          false;
+
+        conversationActive =
+          true;
+
+        etat.textContent =
+          "🎠 Service sélectionné : " +
+          servicesRoleSelectionne.nom;
+
+        return;
+      }
+
+
+      /* STOP GÉNÉRAL */
+
+      if (
+        estCommandeStop(resultat)
+      ) {
+
+        if (
+          musicCarouselActif
+        ) {
+
+          if (Date.now() < verrouSelectionMusiqueJusqua) {
+            return;
+          }
+
+          arreterCarrouselMusique(true);
+
+          traitementQuestion = false;
+          conversationActive = true;
+          return;
+
+        } else if (
+          musiqueEnCours &&
+          Date.now() < verrouSelectionMusiqueJusqua
+        ) {
+          /* Même utterance que la sélection : ne pas couper le MP3. */
+          return;
+
+        } else if (
+          servicesCarouselActif
+        ) {
+
+          arreterCarrouselServices(true);
+
+          traitementQuestion =
+            false;
+
+          conversationActive =
+            true;
+
+          etat.textContent =
+            "🎠 Service sélectionné : " +
+            servicesRoleSelectionne.nom;
+
+          return;
+
+        } else if (
+          rendezVousActif
+        ) {
+
+          annulerRendezVous();
+
+        } else if (
+          musiqueEnCours
+        ) {
+
+          stopMusiqueEtRetourEcoute();
+
+        } else {
+
+          attenteQuestion =
+            false;
+
+          traitementQuestion =
+            false;
+
+          conversationActive =
+            true;
+
+          etat.textContent =
+            "👂 Sophia vous écoute...";
+
+          setTimeout(
+            demarrerEcoute,
+            300
+          );
+        }
+
+        return;
+      }
+
+
+      /* RENDEZ-VOUS */
+
+      if (
+        rendezVousActif &&
+        !traitementQuestion
+      ) {
+
+        traiterEtapeRendezVous(
+          resultat
+        );
+
+        return;
+      }
+
+
+      /* MORCEAU BOB MARLEY */
+
+      if (
+        attenteMorceauBobMarley &&
+        !traitementQuestion
+      ) {
+
+        traiterQuestion(
+          normaliser(resultat)
+        );
+
+        return;
+      }
+
+
+      /* CONVERSATION ACTIVE */
+
+      if (
+        conversationActive &&
+        !traitementQuestion
+      ) {
+
+        const question =
+          normaliser(resultat);
+
+        if (!question) {
+          return;
+        }
+
+        traiterQuestion(
+          question
+        );
+
+        return;
+      }
+
+
+      /* MODE « SOPHIA » */
+
+      if (
+        !attenteQuestion &&
+        !traitementQuestion
+      ) {
+
+        if (
+          !contientSophia(resultat)
+        ) {
+
+          return;
+        }
+
+        const reste =
+          retirerSophia(
+            resultat
+          );
+
+        if (!reste) {
+
+          attenteQuestion =
+            true;
+
+          etat.textContent =
+            "🎤 Oui, je vous écoute...";
+
+          return;
+        }
+
+        traiterQuestion(
+          reste
+        );
+
+        return;
+      }
+
+
+      /* QUESTION APRÈS SOPHIA */
+
+      if (
+        attenteQuestion &&
+        !traitementQuestion
+      ) {
+
+        const question =
+          normaliser(resultat);
+
+        if (!question) {
+          return;
+        }
+
+        traiterQuestion(
+          question
+        );
+      }
+    };
+
+
+  reconnaissance.onerror =
+    event => {
+
+      console.error(
+        "❌ Reconnaissance :",
+        event.error
+      );
+
+      reconnaissanceActive =
+        false;
+
+      /*
+         Pendant une vidéo du carrousel,
+         aucune relance automatique du micro.
+      */
+
+      if (
+        servicesVideoEnCours ||
+        ecouteSuspendueParVideoService ||
+        blocageResultatsService ||
+        Date.now() < resultatsServiceInterditsJusqua
+      ) {
+        return;
+      }
+
+      if (
+        event.error ===
+        "not-allowed"
+      ) {
+
+        modeVeille =
+          false;
+
+        modeSommeil =
+          false;
+
+        microphoneAutorise =
+          false;
+
+        etat.textContent =
+          "⚠️ Autorisez le microphone dans le navigateur.";
+
+        return;
+      }
+
+      if (
+        modeVeille
+      ) {
+
+        setTimeout(
+          demarrerEcoute,
+          500
+        );
+      }
+    };
+
+
+  reconnaissance.onend =
+    () => {
+
+      reconnaissanceActive =
+        false;
+
+      /*
+         IMPORTANT :
+         Chrome peut déclencher onend après le stop()
+         effectué au lancement de la vidéo.
+         On interdit donc ici toute relance automatique
+         pendant le verrouillage du carrousel.
+      */
+
+      if (
+        servicesVideoEnCours ||
+        ecouteSuspendueParVideoService ||
+        blocageResultatsService ||
+        Date.now() < resultatsServiceInterditsJusqua
+      ) {
+
+        console.log(
+          "🔇 Reconnaissance arrêtée : vidéo de service en cours."
+        );
+
+        return;
+      }
+
+      if (audioLectureEnCours && musiqueEnCours) {
+        // Chrome peut terminer une session : relancer l'écoute tant que le MP3 joue.
+        setTimeout(demarrerEcoute, 300);
+        return;
+      }
+
+      if (
+        modeVeille &&
+        !traitementQuestion
+      ) {
+
+        setTimeout(
+          demarrerEcoute,
+          300
+        );
+      }
+    };
+}
+
+
+/* =========================================================
+   MICROPHONE
+========================================================= */
+
+async function autoriserMicrophone() {
+
+  if (
+    !navigator.mediaDevices ||
+    !navigator.mediaDevices.getUserMedia
+  ) {
+    return true;
+  }
+
+  try {
+
+    etat.textContent =
+      "🎤 Autorisation du microphone...";
+
+    const flux =
+      await navigator.mediaDevices
+        .getUserMedia({
+          audio: true
+        });
+
+    flux
+      .getTracks()
+      .forEach(
+        piste =>
+          piste.stop()
+      );
+
+    microphoneAutorise =
+      true;
+
+    return true;
+
+  } catch (erreur) {
+
+    microphoneAutorise =
+      false;
+
+    console.error(
+      "❌ Microphone :",
+      erreur
+    );
+
+    etat.textContent =
+      "⚠️ Autorisez le microphone dans le navigateur.";
+
+    return false;
+  }
+}
+
+
+/* =========================================================
+   TRAITER QUESTION
+========================================================= */
+
+async function traiterQuestion(
+  question,
+  source = "jaune"
+) {
+
+  if (traitementQuestion || audioLectureEnCours) {
+    return;
+  }
+
+  traitementQuestion =
+    true;
+
+  sourceVideo =
+    source;
+
+  attenteQuestion =
+    false;
+
+  signalerInteraction();
+
+  texte.value =
+    question;
+
+  etat.textContent =
+    "🔎 Recherche de la réponse...";
+
+  try {
+
+    if (reconnaissance) {
+      reconnaissance.stop();
+    }
+
+  } catch (erreur) {}
+
+
+  /* BIBLIOTHÈQUE MUSICALE — vidéo de réponse puis carrousel */
+  if (estCommandeBibliothequeMusicale(question)) {
+
+    conversationActive = true;
+    attenteMorceauBobMarley = false;
+
+    try {
+
+      await jouerVideo(
+        VIDEO_REPONSE_BIBLIOTHEQUE_MUSICALE,
+        () => {
+          demarrerCarrouselMusique();
+        }
+      );
+
+      traitementQuestion = false;
+      conversationActive = true;
+      etat.textContent =
+        "🎵 Bibliothèque musicale... Dites « stop » pour écouter.";
+
+      if (modeVeille && !modeSommeil) {
+        setTimeout(demarrerEcoute, 300);
+      }
+
+    } catch (erreur) {
+
+      console.error(
+        "❌ Vidéo bibliothèque musicale :",
+        erreur
+      );
+
+      traitementQuestion = false;
+      etat.textContent =
+        "⚠️ La vidéo de la bibliothèque musicale n'a pas pu être lue.";
+    }
+
+    return;
+  }
+
+  /* STOP DU CARROUSEL MUSICAL */
+  if (
+    musicCarouselActif &&
+    (estCommandeStopCarrousel(question) || estCommandeStop(question))
+  ) {
+    if (Date.now() < verrouSelectionMusiqueJusqua) {
+      traitementQuestion = false;
+      return;
+    }
+    arreterCarrouselMusique(true);
+    traitementQuestion = false;
+    conversationActive = true;
+    return;
+  }
+
+  let reponse =
+    trouverReponse(
+      question
+    );
+
+
+  if (
+    attenteMorceauBobMarley
+  ) {
+
+    const q =
+      normaliser(question);
+
+    if (
+      q.includes("one love")
+    ) {
+
+      reponse =
+        connaissances.reponses.find(
+          r => r.id === "one_love"
+        );
+    }
+
+    if (
+      q.includes("redemption song")
+    ) {
+
+      reponse =
+        connaissances.reponses.find(
+          r =>
+            r.id ===
+            "redemption_song"
+        );
+    }
+  }
+
+
+  if (!reponse) {
+
+    reponse =
+      trouverReponseParDefaut();
+  }
+
+
+  if (!reponse) {
+
+    traitementQuestion =
+      false;
+
+    etat.textContent =
+      "Je n’ai pas trouvé de réponse.";
+
+    if (modeVeille) {
+
+      setTimeout(
+        demarrerEcoute,
+        1000
+      );
+    }
+
+    return;
+  }
+
+
+  /* SERVICES / CARROUSEL */
+
+  if (
+    reponse.id === "services" ||
+    reponse.type === "services"
+  ) {
+
+    conversationActive =
+      true;
+
+    try {
+
+      await jouerVideo(
+        reponse.video ||
+        "videos/services.mp4",
+        () =>
+          demarrerCarrouselServices()
+      );
+
+      traitementQuestion =
+        false;
+
+      etat.textContent =
+        "🎠 Les services défilent... Dites « stop » pour choisir.";
+
+      if (
+        modeVeille &&
+        !modeSommeil
+      ) {
+
+        setTimeout(
+          demarrerEcoute,
+          300
+        );
+      }
+
+    } catch (erreur) {
+
+      console.error(
+        "❌ Vidéo services :",
+        erreur
+      );
+
+      traitementQuestion =
+        false;
+
+      etat.textContent =
+        "⚠️ La présentation des services n'a pas pu être lue.";
+    }
+
+    return;
+  }
+
+
+  /* QUESTION SUR LE SERVICE SÉLECTIONNÉ */
+
+  if (
+    servicesRoleSelectionne &&
+    !servicesCarouselActif &&
+    estQuestionSurServiceSelectionne(
+      question
+    )
+  ) {
+
+    try {
+
+      await jouerVideoRoleService(
+        servicesRoleSelectionne
+      );
+
+    } catch (erreur) {
+
+      console.error(
+        "❌ Vidéo service sélectionné :",
+        erreur
+      );
+    }
+
+    return;
+  }
+
+
+  /* RENDEZ-VOUS */
+
+  if (
+    reponse.id ===
+    "rendez_vous" ||
+    reponse.type ===
+    "prise_rendez_vous"
+  ) {
+
+    await demarrerRendezVous(
+      reponse
+    );
+
+    return;
+  }
+
+
+  /* BOB MARLEY */
+
+  if (
+    reponse.id ===
+    "bob_marley" ||
+    reponse.type ===
+    "demande_musique"
+  ) {
+
+    attenteMorceauBobMarley =
+      true;
+
+    conversationActive =
+      true;
+
+    try {
+
+      await jouerVideo(
+        reponse.video
+      );
+
+      traitementQuestion =
+        false;
+
+      etat.textContent =
+        "🎵 Quel morceau de Bob Marley veux-tu écouter ?";
+
+      if (modeVeille) {
+
+        setTimeout(
+          demarrerEcoute,
+          500
+        );
+      }
+
+    } catch (erreur) {
+
+      console.error(
+        erreur
+      );
+
+      attenteMorceauBobMarley =
+        false;
+
+      traitementQuestion =
+        false;
+    }
+
+    return;
+  }
+
+
+  /* MUSIQUE */
+
+  if (
+    reponse.type ===
+    "musique"
+  ) {
+
+    attenteMorceauBobMarley =
+      false;
+
+    conversationActive =
+      true;
+
+    traitementQuestion =
+      false;
+
+    try {
+
+      await jouerMusique(
+        reponse.audio,
+        reponse.image,
+        reponse.texte_lecture
+      );
+
+    } catch (erreur) {
+
+      console.error(
+        "❌ Erreur musique :",
+        erreur
+      );
+    }
+
+    return;
+  }
+
+
+  /* IMAGE */
+
+  imageSupplementaire.style.display =
+    "none";
+
+  imageSupplementaire.removeAttribute(
+    "src"
+  );
+
+  const cheminImage =
+    reponse.image ||
+    reponse.image_associee ||
+    reponse["image_associée"] ||
+    reponse.imageAssociee;
+
+  if (cheminImage) {
+
+    imageSupplementaire.src =
+      cheminImage;
+
+    imageSupplementaire.style.display =
+      "block";
+  }
+
+
+  /* VIDÉO */
+
+  try {
+
+    await jouerVideo(
+      reponse.video
+    );
+
+  } catch (erreur) {
+
+    console.error(
+      "❌ Erreur vidéo :",
+      erreur
+    );
+
+    traitementQuestion =
+      false;
+
+    etat.textContent =
+      "⚠️ Cette vidéo n’a pas pu être lue.";
+
+    if (modeVeille) {
+
+      setTimeout(
+        demarrerEcoute,
+        1000
+      );
+    }
+  }
+}
+
+
+/* =========================================================
+   ÉCOUTE
+========================================================= */
+
+function demarrerEcoute() {
+
+  if (!reconnaissance) {
+
+    etat.textContent =
+      "⚠️ Reconnaissance vocale indisponible.";
+
+    return;
+  }
+
+  /*
+     Aucune écoute pendant une vidéo de service.
+  */
+
+  if (
+    servicesVideoEnCours ||
+    ecouteSuspendueParVideoService ||
+    blocageResultatsService ||
+    Date.now() < resultatsServiceInterditsJusqua
+  ) {
+
+    console.log(
+      "🔇 demarrerEcoute() bloqué pendant la vidéo du carrousel."
+    );
+
+    return;
+  }
+
+  if (
+    !modeVeille ||
+    reconnaissanceActive ||
+    traitementQuestion
+  ) {
+    return;
+  }
+
+  try {
+
+    reconnaissance.start();
+
+  } catch (erreur) {
+
+    console.log(
+      "ℹ️ Reconnaissance déjà active."
+    );
+  }
+}
+
+
+/* =========================================================
+   BOUTON JAUNE
+========================================================= */
+
+micro.addEventListener(
+  "click",
+  async event => {
+
+    event.stopPropagation();
+
+    signalerInteraction();
+
+    if (!reconnaissance) {
+
+      etat.textContent =
+        "⚠️ Reconnaissance vocale indisponible.";
+
+      return;
+    }
+
+    if (
+      modeSommeil
+    ) {
+
+      await reveillerSophia();
+
+      return;
+    }
+
+    if (
+      musiqueEnCours
+    ) {
+
+      if (
+        basculerPauseMusique()
+      ) {
+        return;
+      }
+    }
+
+    if (
+      videoAvatar.src &&
+      !videoAvatar.ended
+    ) {
+
+      if (
+        basculerPauseVideo()
+      ) {
+        return;
+      }
+    }
+
+    if (modeVeille) {
+
+      modeVeille =
+        false;
+
+      modeSommeil =
+        false;
+
+      attenteQuestion =
+        false;
+
+      traitementQuestion =
+        false;
+
+      reinitialiserRendezVous();
+
+      conversationActive =
+        false;
+
+      lectureBonjour =
+        false;
+
+      attenteMorceauBobMarley =
+        false;
+
+      if (minuterieVeille) {
+
+        clearTimeout(
+          minuterieVeille
+        );
+      }
+
+      try {
+        reconnaissance.stop();
+      } catch (erreur) {}
+
+      etat.textContent =
+        "Sophia est en pause.";
+
+      return;
+    }
+
+    /* ACTIVATION */
+
+    modeVeille =
+      true;
+
+    modeSommeil =
+      false;
+
+    attenteQuestion =
+      false;
+
+    conversationActive =
+      false;
+
+    lectureBonjour =
+      true;
+
+    traitementQuestion =
+      true;
+
+    attenteMorceauBobMarley =
+      false;
+
+    const autorise =
+      await autoriserMicrophone();
+
+    if (!autorise) {
+
+      modeVeille =
+        false;
+
+      conversationActive =
+        false;
+
+      lectureBonjour =
+        false;
+
+      traitementQuestion =
+        false;
+
+      return;
+    }
+
+    let videoBonjour =
+      "videos/bonjour.mp4";
+
+    if (
+      connaissances &&
+      Array.isArray(
+        connaissances.reponses
+      )
+    ) {
+
+      const accueil =
+        connaissances.reponses.find(
+          reponse =>
+            reponse.question &&
+            normaliser(
+              reponse.question
+            ) ===
+            "bonjour"
+        );
+
+      if (
+        accueil &&
+        accueil.video
+      ) {
+
+        videoBonjour =
+          accueil.video;
+      }
+    }
+
+    try {
+
+      await jouerVideo(
+        videoBonjour
+      );
+
+      lectureBonjour =
+        false;
+
+      conversationActive =
+        true;
+
+      traitementQuestion =
+        false;
+
+      etat.textContent =
+        "👂 Je vous écoute...";
+
+      redemarrerMinuterieVeille();
+
+      setTimeout(
+        demarrerEcoute,
+        300
+      );
+
+    } catch (erreur) {
+
+      console.error(
+        "❌ Vidéo Bonjour :",
+        erreur
+      );
+
+      lectureBonjour =
+        false;
+
+      traitementQuestion =
+        false;
+
+      etat.textContent =
+        "⚠️ La vidéo Bonjour n'a pas pu être lue.";
+    }
+  }
+);
+
+
+/* =========================================================
+   PAUSE VIDÉO
+========================================================= */
+
+function basculerPauseVideo() {
+
+  if (
+    !videoAvatar.src ||
+    videoAvatar.ended
+  ) {
+    return false;
+  }
+
+  if (
+    videoAvatar.paused
+  ) {
+
+    videoAvatar
+      .play()
+      .then(
+        () => {
+
+          videoEnPause =
+            false;
+
+          etat.textContent =
+            "🎬 Sophia vous répond...";
+        }
+      );
+
+  } else {
+
+    videoAvatar.pause();
+
+    videoEnPause =
+      true;
+
+    etat.textContent =
+      "⏸️ Vidéo en pause — cliquez pour reprendre.";
+  }
+
+  return true;
+}
+
+
+/* =========================================================
+   PAUSE MUSIQUE
+========================================================= */
+
+function basculerPauseMusique() {
+
+  if (
+    !lecteurAudio ||
+    !musiqueEnCours ||
+    !lecteurAudio.src
+  ) {
+    return false;
+  }
+
+  if (
+    lecteurAudio.paused
+  ) {
+
+    lecteurAudio
+      .play()
+      .then(
+        () => {
+
+          etat.textContent =
+            "🎵 Musique en cours...";
+        }
+      );
+
+  } else {
+
+    lecteurAudio.pause();
+
+    etat.textContent =
+      "⏸️ Musique en pause — cliquez pour reprendre.";
+  }
+
+  return true;
+}
+
+
+/* =========================================================
+   COMMANDES VISIBLES DU CARROUSEL
+========================================================= */
+
+boutonRelanceCarrousel.addEventListener(
+  "click",
+  event => {
+
+    event.stopPropagation();
+
+    signalerInteraction();
+
+    if (servicesCarousel) {
+      arreterVideosServices();
+    }
+
+    demarrerCarrouselServices();
+
+    traitementQuestion =
+      false;
+
+    conversationActive =
+      true;
+
+    etat.textContent =
+      "🎠 Les services défilent... Dites « stop » pour choisir.";
+  }
+);
+
+
+boutonStopCarrousel.addEventListener(
+  "click",
+  event => {
+
+    event.stopPropagation();
+
+    signalerInteraction();
+
+    if (!servicesCarouselActif)
+      return;
+
+    arreterCarrouselServices(true);
+
+    traitementQuestion =
+      false;
+
+    conversationActive =
+      true;
+
+    etat.textContent =
+      "🎠 Service sélectionné : " +
+      servicesRoleSelectionne.nom;
+  }
+);
+
+boutonFermerCarrousel.addEventListener(
+  "click",
+  event => {
+    event.stopPropagation();
+    signalerInteraction();
+    if (!servicesCarouselActif) return;
+    fermerCarrouselServices();
+    traitementQuestion = false;
+    conversationActive = true;
+    etat.textContent = "👂 Sophia vous écoute...";
+  }
+);
+
+boutonRelanceMusique.addEventListener("click", event => {
+  event.stopPropagation();
+  signalerInteraction();
+  demarrerCarrouselMusique();
+  traitementQuestion = false;
+  conversationActive = true;
+  etat.textContent = "🎵 Les morceaux défilent... Dites « stop » pour écouter.";
+});
+
+boutonStopMusique.addEventListener("click", event => {
+  event.stopPropagation();
+  signalerInteraction();
+  if (!musicCarouselActif) return;
+  arreterCarrouselMusique(true);
+  traitementQuestion = false;
+  conversationActive = true;
+});
+
+boutonFermerMusique.addEventListener("click", event => {
+  event.stopPropagation();
+  signalerInteraction();
+  fermerCarrouselMusique();
+  traitementQuestion = false;
+  conversationActive = true;
+  etat.textContent = "👂 Sophia vous écoute...";
+});
+
+
+/* =========================================================
+   MENU THÈMES
+========================================================= */
+
+boutonThemes.addEventListener(
+  "click",
+  event => {
+
+    event.stopPropagation();
+
+    signalerInteraction();
+
+    themesMenu.classList.toggle(
+      "ouvert"
+    );
+
+    if (
+      !themesMenu.classList.contains(
+        "ouvert"
+      )
+    ) {
+
+      fablesSubmenu.classList.remove(
+        "ouvert"
+      );
+
+      boutonFables.classList.remove(
+        "ouvert"
+      );
+    }
+  }
+);
+
+
+/* =========================================================
+   FABLES
+========================================================= */
+
+boutonFables.addEventListener(
+  "click",
+  event => {
+
+    event.stopPropagation();
+
+    signalerInteraction();
+
+    fablesSubmenu.classList.toggle(
+      "ouvert"
+    );
+
+    boutonFables.classList.toggle(
+      "ouvert"
+    );
+  }
+);
+
+
+/* =========================================================
+   BOUTONS THÈMES
+========================================================= */
+
+document
+  .querySelectorAll(
+    "#themesMenu .themeItem[data-question]"
+  )
+  .forEach(
+    bouton => {
+
+      bouton.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+
+          signalerInteraction();
+
+          const question =
+            bouton.dataset.question;
+
+          themesMenu.classList.remove(
+            "ouvert"
+          );
+
+          fablesSubmenu.classList.remove(
+            "ouvert"
+          );
+
+          boutonFables.classList.remove(
+            "ouvert"
+          );
+
+          reinitialiserRendezVous();
+
+          traitementQuestion =
+            false;
+
+          attenteQuestion =
+            false;
+
+          attenteMorceauBobMarley =
+            false;
+
+          traiterQuestion(
+            question,
+            "violet"
+          );
+        }
+      );
+    }
+  );
+
+
+/* =========================================================
+   CLIC AILLEURS
+========================================================= */
+
+document.addEventListener(
+  "click",
+  () => {
+
+    themesMenu.classList.remove(
+      "ouvert"
+    );
+
+    fablesSubmenu.classList.remove(
+      "ouvert"
+    );
+
+    boutonFables.classList.remove(
+      "ouvert"
+    );
+  }
+);
+
+
+/* =========================================================
+   INITIALISATION
+========================================================= */
+
+imageSupplementaire.style.display =
+  "none";
+
+servicesCarousel.classList.remove(
+  "actif"
+);
+
+servicesCarousel.setAttribute(
+  "aria-hidden",
+  "true"
+);
+
+servicesCommandes.classList.remove(
+  "actif"
+);
+
+servicesCommandes.setAttribute(
+  "aria-hidden",
+  "true"
+);
+
+rendreCarrouselServices();
+
+chargerConnaissances();
+
+initialiserClavierEmail();
+
+console.log(
+  "✅ Sophia initialisée."
+);
+
+</script>
+
+</body>
+</html>

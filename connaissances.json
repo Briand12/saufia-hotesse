@@ -1,0 +1,663 @@
+{
+  "ville": "Château-Thierry",
+  "titre": "Mon avatar raconte Château-Thierry",
+  "version": "3.0",
+  "description": "Base locale de questions et mots-clés pour Sophia, avatar vidéo consacré à Château-Thierry. Les réponses sont associées à des vidéos pré-enregistrées. Le système privilégie les expressions précises afin d'éviter les confusions entre les différents sujets.",
+  "reponses": [
+    {
+      "id": "bonjour",
+      "question": "Bonjour",
+      "categorie": "accueil",
+      "mots_cles": [
+        "bonjour",
+        "salut",
+        "coucou",
+        "hello",
+        "bonsoir",
+        "bonjour sophia"
+      ],
+      "video": "videos/bonjour.mp4"
+    },
+    {
+      "id": "comment_allez_vous",
+      "question": "Comment allez-vous ?",
+      "categorie": "accueil",
+      "mots_cles": [
+        "comment allez vous",
+        "comment vas tu",
+        "ça va",
+        "ca va",
+        "vous allez bien",
+        "allez vous bien",
+        "comment vous allez"
+      ],
+      "video": "videos/comment-allez-vous.mp4"
+    },
+    {
+      "id": "ville",
+      "question": "Qu'est-ce que Château-Thierry ?",
+      "categorie": "ville",
+      "mots_cles": [
+        "chateau thierry",
+        "ville de chateau thierry",
+        "la ville de chateau thierry",
+        "presente la ville",
+        "présente la ville",
+        "presente chateau thierry",
+        "présente château-thierry",
+        "parle moi de chateau thierry",
+        "parle moi de château-thierry"
+      ],
+      "video": "videos/ville.mp4"
+    },
+    {
+      "id": "la_fontaine",
+      "question": "Qui est Jean de La Fontaine ?",
+      "categorie": "personnages",
+      "mots_cles": [
+        "jean de la fontaine",
+        "jean la fontaine",
+        "la fontaine",
+        "lafontaine",
+        "qui est la fontaine",
+        "fabuliste",
+        "poete",
+        "poète"
+      ],
+      "video": "videos/la-fontaine.mp4"
+    },
+    {
+      "id": "naissance_la_fontaine",
+      "question": "Où est né Jean de La Fontaine ?",
+      "categorie": "personnages",
+      "mots_cles": [
+        "ou est ne jean de la fontaine",
+        "où est né jean de la fontaine",
+        "ou est ne la fontaine",
+        "où est né la fontaine",
+        "ne a chateau thierry",
+        "né à château thierry",
+        "naissance la fontaine",
+        "lieu de naissance la fontaine",
+        "ou est ne le fabuliste",
+        "où est né le fabuliste"
+      ],
+      "video": "videos/naissance-la-fontaine.mp4"
+    },
+    {
+      "id": "maison_la_fontaine",
+      "question": "Peut-on visiter la maison natale de La Fontaine ?",
+      "categorie": "patrimoine",
+      "mots_cles": [
+        "maison natale de la fontaine",
+        "maison de la fontaine",
+        "musee la fontaine",
+        "musée la fontaine",
+        "visiter la maison de la fontaine",
+        "visiter la fontaine",
+        "maison jean de la fontaine"
+      ],
+      "video": "videos/maison-la-fontaine.mp4"
+    },
+    {
+      "id": "fable_corbeau_renard",
+      "question": "Le Corbeau et le Renard",
+      "categorie": "fables",
+      "mots_cles": [
+        "le corbeau et le renard",
+        "corbeau et renard",
+        "corbeau renard",
+        "fable du corbeau et du renard",
+        "fable corbeau renard",
+        "raconte le corbeau et le renard",
+        "parle moi du corbeau et du renard"
+      ],
+      "video": "videos/fable-corbeau-renard.mp4"
+    },
+    {
+      "id": "fable_cigale_fourmi",
+      "question": "La Cigale et la Fourmi",
+      "categorie": "fables",
+      "mots_cles": [
+        "la cigale et la fourmi",
+        "cigale et fourmi",
+        "cigale fourmi",
+        "fable de la cigale et de la fourmi",
+        "fable cigale fourmi",
+        "raconte la cigale et la fourmi",
+        "parle moi de la cigale et de la fourmi"
+      ],
+      "video": "videos/fable-cigale-fourmi.mp4"
+    },
+    {
+      "id": "fable_lievre_tortue",
+      "question": "Le Lièvre et la Tortue",
+      "categorie": "fables",
+      "mots_cles": [
+        "le lievre et la tortue",
+        "lièvre et tortue",
+        "lievre et tortue",
+        "lievre tortue",
+        "lièvre tortue",
+        "fable du lievre et de la tortue",
+        "fable du lièvre et de la tortue",
+        "fable lievre tortue",
+        "raconte le lievre et la tortue",
+        "raconte le lièvre et la tortue"
+      ],
+      "video": "videos/fable-lievre-tortue.mp4"
+    },
+    {
+      "id": "fable_loup_agneau",
+      "question": "Le Loup et l'Agneau",
+      "categorie": "fables",
+      "mots_cles": [
+        "le loup et l agneau",
+        "le loup et lagneau",
+        "loup et agneau",
+        "loup agneau",
+        "fable du loup et de l agneau",
+        "fable du loup et de l'agneau",
+        "fable loup agneau",
+        "raconte le loup et l agneau",
+        "raconte le loup et l'agneau"
+      ],
+      "video": "videos/fable-loup-agneau.mp4"
+    },
+    {
+      "id": "fable_rat_ville_rat_champs",
+      "question": "Le Rat de ville et le Rat des champs",
+      "categorie": "fables",
+      "mots_cles": [
+        "le rat de ville et le rat des champs",
+        "rat de ville et rat des champs",
+        "rat de ville",
+        "rat des champs",
+        "rat ville rat champs",
+        "fable du rat de ville et du rat des champs",
+        "fable rat ville rat champs",
+        "raconte le rat de ville et le rat des champs"
+      ],
+      "video": "videos/fable-rat-ville-rat-champs.mp4"
+    },
+    {
+      "id": "fables",
+      "question": "Quelles sont les fables de La Fontaine ?",
+      "categorie": "culture",
+      "mots_cles": [
+        "quelles sont les fables",
+        "les fables de la fontaine",
+        "fables de la fontaine",
+        "parle moi des fables",
+        "parle moi des fables de la fontaine",
+        "quelles fables",
+        "les fables"
+      ],
+      "video": "videos/fables.mp4"
+    },
+    {
+      "id": "chateau_medieval",
+      "question": "Que peut-on voir au château médiéval ?",
+      "categorie": "patrimoine",
+      "mots_cles": [
+        "chateau medieval",
+        "château médiéval",
+        "chateau medieval de chateau thierry",
+        "château médiéval de château-thierry",
+        "le chateau medieval",
+        "le château médiéval",
+        "forteresse",
+        "ruines du chateau",
+        "ruines du château",
+        "remparts du chateau",
+        "remparts du château",
+        "chateau de thierry",
+        "château de thierry"
+      ],
+      "video": "videos/chateau-medieval.mp4"
+    },
+    {
+      "id": "moyen_age",
+      "question": "Pourquoi le château est-il important ?",
+      "categorie": "histoire",
+      "mots_cles": [
+        "moyen age",
+        "moyen-âge",
+        "histoire du chateau",
+        "histoire du château",
+        "fortifications medievales",
+        "fortifications médiévales",
+        "architecture medievale",
+        "architecture médiévale",
+        "histoire medievale",
+        "histoire médiévale",
+        "chateau au moyen age",
+        "château au moyen âge"
+      ],
+      "video": "videos/moyen-age.mp4"
+    },
+    {
+      "id": "hotel_dieu",
+      "question": "Qu'est-ce que l'Hôtel-Dieu ?",
+      "categorie": "patrimoine",
+      "mots_cles": [
+        "hotel dieu",
+        "hôtel dieu",
+        "hotel-dieu",
+        "hôtel-dieu",
+        "tresor hotel dieu",
+        "trésor hôtel dieu",
+        "musee hotel dieu",
+        "musée hôtel dieu"
+      ],
+      "video": "videos/hotel-dieu.mp4"
+    },
+    {
+      "id": "histoire_hotel_dieu",
+      "question": "Depuis quand existe l'Hôtel-Dieu ?",
+      "categorie": "histoire",
+      "mots_cles": [
+        "histoire hotel dieu",
+        "histoire hôtel dieu",
+        "fondation hotel dieu",
+        "fondation hôtel dieu",
+        "depuis quand existe hotel dieu",
+        "depuis quand existe hôtel dieu",
+        "1304",
+        "700 ans"
+      ],
+      "video": "videos/histoire-hotel-dieu.mp4"
+    },
+    {
+      "id": "marne",
+      "question": "Quelle rivière traverse Château-Thierry ?",
+      "categorie": "geographie",
+      "mots_cles": [
+        "quelle riviere traverse chateau thierry",
+        "quelle rivière traverse château-thierry",
+        "riviere marne",
+        "rivière marne",
+        "la marne traverse la ville",
+        "fleuve marne"
+      ],
+      "video": "videos/marne.mp4"
+    },
+    {
+      "id": "vignoble",
+      "question": "Y a-t-il du champagne autour de Château-Thierry ?",
+      "categorie": "territoire",
+      "mots_cles": [
+        "champagne autour de chateau thierry",
+        "champagne autour de château-thierry",
+        "champagne",
+        "vignoble",
+        "vignobles",
+        "vignes",
+        "vigne",
+        "route du champagne",
+        "viticulture",
+        "champagne autour"
+      ],
+      "video": "videos/champagne.mp4"
+    },
+    {
+      "id": "portes_champagne",
+      "question": "Que sont les Portes de la Champagne ?",
+      "categorie": "territoire",
+      "mots_cles": [
+        "portes de la champagne",
+        "portes champagne",
+        "maison du tourisme",
+        "territoire des portes de la champagne",
+        "route touristique"
+      ],
+      "video": "videos/portes-de-la-champagne.mp4"
+    },
+    {
+      "id": "cote_204",
+      "question": "Qu'est-ce que le monument américain de la Côte 204 ?",
+      "categorie": "memoire",
+      "mots_cles": [
+        "cote 204",
+        "côte 204",
+        "monument americain de la cote 204",
+        "monument américain de la côte 204",
+        "monument americain",
+        "monument américain",
+        "americains cote 204",
+        "américains côte 204"
+      ],
+      "video": "videos/cote-204.mp4"
+    },
+    {
+      "id": "grande_guerre",
+      "question": "Quel est le lien entre Château-Thierry et la Grande Guerre ?",
+      "categorie": "memoire",
+      "mots_cles": [
+        "grande guerre",
+        "premiere guerre mondiale",
+        "première guerre mondiale",
+        "chateau thierry premiere guerre",
+        "château-thierry première guerre",
+        "chateau thierry grande guerre",
+        "château-thierry grande guerre",
+        "1914",
+        "1918",
+        "bataille de chateau thierry",
+        "bataille de château-thierry"
+      ],
+      "video": "videos/grande-guerre.mp4"
+    },
+    {
+      "id": "chesneaux",
+      "question": "Qu'est-ce que la nécropole des Chesneaux ?",
+      "categorie": "memoire",
+      "mots_cles": [
+        "necropole des chesneaux",
+        "nécropole des chesneaux",
+        "chesneaux",
+        "necropole",
+        "nécropole",
+        "cimetiere militaire des chesneaux",
+        "cimetière militaire des chesneaux",
+        "soldats des chesneaux"
+      ],
+      "video": "videos/chesneaux.mp4"
+    },
+    {
+      "id": "tour_balhan",
+      "question": "Qu'est-ce que la Tour Balhan ?",
+      "categorie": "patrimoine",
+      "mots_cles": [
+        "tour balhan",
+        "tour-balhan",
+        "balhan",
+        "tour balhan chateau thierry",
+        "tour balhan château-thierry",
+        "fort saint jacques",
+        "fort saint-jacques"
+      ],
+      "video": "videos/tour-balhan.mp4"
+    },
+    {
+      "id": "saint_crepin",
+      "question": "Que peut-on découvrir à l'église Saint-Crépin ?",
+      "categorie": "patrimoine",
+      "mots_cles": [
+        "saint crepin",
+        "saint-crépin",
+        "saint crepin chateau thierry",
+        "saint-crépin château-thierry",
+        "eglise saint crepin",
+        "église saint crépin",
+        "eglise saint-crepin",
+        "église saint-crépin"
+      ],
+      "video": "videos/saint-crepin.mp4"
+    },
+    {
+      "id": "rose",
+      "question": "Y a-t-il une roseraie au château ?",
+      "categorie": "loisirs",
+      "mots_cles": [
+        "roseraie",
+        "roseraie du chateau",
+        "roseraie du château",
+        "roses",
+        "roses anciennes",
+        "jardin medieval",
+        "jardin médiéval",
+        "jardin des roses"
+      ],
+      "video": "videos/roseraie.mp4"
+    },
+    {
+      "id": "fauconnerie",
+      "question": "Peut-on voir de la fauconnerie au château ?",
+      "categorie": "loisirs",
+      "mots_cles": [
+        "fauconnerie",
+        "fauconnerie au chateau",
+        "fauconnerie au château",
+        "faucons",
+        "rapaces",
+        "spectacle de fauconnerie",
+        "oiseaux de proie"
+      ],
+      "video": "videos/fauconnerie.mp4"
+    },
+    {
+      "id": "cinema_theatre",
+      "question": "Qu'est-ce que le cinéma-théâtre Jean Cocteau ?",
+      "categorie": "culture",
+      "mots_cles": [
+        "jean cocteau",
+        "cinema theatre jean cocteau",
+        "cinéma théâtre jean cocteau",
+        "cinema theatre",
+        "cinéma théâtre",
+        "cinema-theatre",
+        "cinéma-théâtre",
+        "spectacles jean cocteau"
+      ],
+      "video": "videos/jean-cocteau.mp4"
+    },
+    {
+      "id": "fete_la_fontaine",
+      "question": "Qu'est-ce que la Fête Jean de La Fontaine ?",
+      "categorie": "evenements",
+      "mots_cles": [
+        "fete jean de la fontaine",
+        "fête jean de la fontaine",
+        "fete la fontaine",
+        "fête la fontaine",
+        "festival jean de la fontaine",
+        "festival la fontaine"
+      ],
+      "video": "videos/fete-la-fontaine.mp4"
+    },
+    {
+      "id": "pont",
+      "question": "Pourquoi la Marne est-elle importante pour la ville ?",
+      "categorie": "ville",
+      "mots_cles": [
+        "pont de chateau thierry",
+        "pont de château-thierry",
+        "pont sur la marne",
+        "pont sur la rivière marne",
+        "bord de marne",
+        "quai de marne",
+        "quais de la marne",
+        "marne pour la ville"
+      ],
+      "video": "videos/pont-et-marne.mp4"
+    },
+    {
+      "id": "balade",
+      "question": "Peut-on se promener et découvrir la ville à pied ?",
+      "categorie": "tourisme",
+      "mots_cles": [
+        "balade dans chateau thierry",
+        "balade dans château-thierry",
+        "promenade dans la ville",
+        "promenade à pied",
+        "promenade a pied",
+        "visite à pied",
+        "visite a pied",
+        "decouvrir la ville a pied",
+        "découvrir la ville à pied",
+        "sentier",
+        "vignes castelles"
+      ],
+      "video": "videos/balade.mp4"
+    },
+    {
+      "id": "insolite",
+      "question": "Donne-moi une anecdote sur Château-Thierry",
+      "categorie": "anecdotes",
+      "mots_cles": [
+        "anecdote sur chateau thierry",
+        "anecdote sur château-thierry",
+        "anecdote",
+        "insolite",
+        "surprends moi",
+        "surprise",
+        "saviez vous",
+        "le saviez vous",
+        "fun fact"
+      ],
+      "video": "videos/anecdote.mp4"
+    },
+    {
+      "id": "le_maire",
+      "question": "Monsieur le Maire",
+      "categorie": "personnages",
+      "mots_cles": [
+        "monsieur le maire",
+        "le maire",
+        "maire"
+      ],
+      "video": "videos/le-maire.mp4"
+    },
+    {
+      "id": "photo",
+      "question": "Peux-tu me montrer une photo ?",
+      "categorie": "visuel",
+      "mots_cles": [
+        "peux tu me montrer une photo",
+        "peux-tu me montrer une photo",
+        "montre moi une photo",
+        "montre-moi une photo",
+        "une photo",
+        "photo"
+      ],
+      "video": "videos/photo.mp4",
+      "image": "assets/photo.jpg"
+    },
+    {
+      "id": "jeremy_presentation",
+      "question": "Je te présente Jérémy",
+      "categorie": "personnages",
+      "mots_cles": [
+        "je te presente jeremy",
+        "je te présente jérémy",
+        "présente-moi jérémy",
+        "presente moi jeremy",
+        "je te présente Jeremy"
+      ],
+      "video": "videos/jeremy.mp4"
+    },
+    {
+      "id": "photo_jeremy",
+      "question": "Peux-tu me montrer une photo de Jérémy ?",
+      "categorie": "visuel",
+      "mots_cles": [
+        "peux tu me montrer une photo de jeremy",
+        "peux-tu me montrer une photo de jérémy",
+        "montre moi une photo de jeremy",
+        "montre-moi une photo de jérémy",
+        "photo de jeremy",
+        "photo de jérémy",
+        "montre moi jeremy",
+        "montre-moi jérémy"
+      ],
+      "video": "videos/photo-jeremy.mp4",
+      "image": "assets/jeremy.jpg"
+    },
+    {
+      "id": "bob_marley",
+      "question": "Joue-moi un morceau de Bob Marley",
+      "categorie": "musique",
+      "type": "demande_musique",
+      "mots_cles": [
+        "joue moi un morceau de bob marley",
+        "joue-moi un morceau de bob marley",
+        "joue un morceau de bob marley",
+        "mets moi un morceau de bob marley",
+        "mets-moi un morceau de bob marley",
+        "mets un morceau de bob marley",
+        "fais moi ecouter bob marley",
+        "fais-moi écouter bob marley",
+        "je veux ecouter bob marley",
+        "je veux écouter bob marley",
+        "musique de bob marley",
+        "un morceau de bob marley",
+        "une chanson de bob marley",
+        "est-ce que tu peux me jouer un morceau de bob marley",
+        "est ce que tu peux me jouer un morceau de bob marley",
+        "peux tu me jouer un morceau de bob marley",
+        "peux-tu me jouer un morceau de bob marley",
+        "tu peux me jouer un morceau de bob marley",
+        "peux tu jouer un morceau de bob marley",
+        "peux-tu jouer un morceau de bob marley",
+        "est ce que tu peux jouer un morceau de bob marley",
+        "est-ce que tu peux jouer un morceau de bob marley",
+        "joue moi bob marley",
+        "joue-moi bob marley",
+        "joue bob marley",
+        "mets moi bob marley",
+        "mets-moi bob marley",
+        "lance bob marley",
+        "fais moi ecouter un morceau de bob marley",
+        "fais-moi écouter un morceau de bob marley"
+      ],
+      "video": "videos/Bob-Marley-question.mp4",
+      "texte": "D'accord, quel morceau de Bob Marley veux-tu écouter ?"
+    },
+    {
+      "id": "one_love",
+      "question": "One Love",
+      "categorie": "musique",
+      "type": "musique",
+      "mots_cles": [
+        "one love"
+      ],
+      "audio": "audio/one-love.mp3",
+      "image": "assets/one-love.jpg",
+      "texte_lecture": "🎵 One Love — Bob Marley"
+    },
+    {
+      "id": "redemption_song",
+      "question": "Redemption Song",
+      "categorie": "musique",
+      "type": "musique",
+      "mots_cles": [
+        "redemption song",
+        "redemption",
+        "redemption son",
+        "redemption sung"
+      ],
+      "audio": "audio/redemption_song.mp3",
+      "image": "assets/redemption-song.jpg",
+      "texte_lecture": "🎵 Redemption Song — Bob Marley"
+    },
+    {
+      "id": "remerciement",
+      "question": "Merci pour tous ces renseignements",
+      "categorie": "accueil",
+      "mots_cles": [
+        "merci",
+        "merci beaucoup",
+        "je vous remercie",
+        "je te remercie",
+        "merci pour ces renseignements",
+        "merci pour tous ces renseignements",
+        "merci pour toutes ces informations",
+        "merci pour les informations",
+        "merci pour votre aide",
+        "merci pour votre temps",
+        "merci beaucoup sophia",
+        "merci sophia",
+        "je vous remercie beaucoup"
+      ],
+      "video": "videos/remerciement.mp4"
+    },
+    {
+      "id": "reponse_par_defaut",
+      "question": "Réponse par défaut",
+      "categorie": "defaut",
+      "mots_cles": [],
+      "video": "videos/reponse-par-defaut.mp4"
+    }
+  ]
+}
