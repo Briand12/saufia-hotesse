@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hôtesse de Château-Thierry</title>
+<link rel="icon" href="data:,">
 
 <style>
 * {
@@ -635,6 +636,11 @@ html, body {
 #musicCarousel.actif { display: block; }
 .musicScene {
   position: relative; width: 100%; height: 100%; transform-style: preserve-3d;
+  opacity: 1;
+  transition: opacity .35s ease;
+}
+.musicScene.fondu {
+  opacity: 0;
 }
 .musicCarte {
   position: absolute; left: 50%; top: 50%;
@@ -735,7 +741,7 @@ html, body {
   <div id="musicCarousel" aria-hidden="true">
     <div class="musicScene" id="musicScene"></div>
     <div class="musicTitre">🎵 Bibliothèque musicale</div>
-    <div class="musicControle" id="musicControle">Dites « stop » pour écouter le morceau affiché</div>
+    <div class="musicControle" id="musicControle">Dites « OK » pour choisir le style affiché</div>
   </div>
 
   <div id="servicesCarousel" aria-hidden="true">
@@ -1091,12 +1097,43 @@ let verrouSelectionMusiqueJusqua = 0;
   dans le projet. Les deux autres sont volontairement des noms
   simples à remplacer par tes deux autres couples image/MP3.
 */
-const musicLibrary = [
-  { nom: "Positif, vibration", image: "assets/positif-vibration.jpg", audio: "audio/positif-vibration.mp3" },
-  { nom: "Punky Reggae Party", image: "assets/punky-reggae-party.jpg", audio: "audio/punky-reggae-party.mp3" },
-  { nom: "Is This Love", image: "assets/is-this-love.jpg", audio: "audio/is-this-love.mp3" },
-  { nom: "War No More Trouble", image: "assets/war-no-more-trouble.jpg", audio: "audio/war-no-more-trouble.mp3" }
+const musicStyles = [
+  { nom: "Pop", image: "assets/pop.png", style: "pop" },
+  { nom: "Rock", image: "assets/rock.png", style: "rock" },
+  { nom: "Reggae", image: "assets/reggae.png", style: "reggae" },
+  { nom: "Country", image: "assets/country.png", style: "country" },
+  { nom: "Classique", image: "assets/classique.png", style: "classique" },
+  { nom: "Variété française", image: "assets/variete_francaise.png", style: "variete_francaise" },
+  { nom: "Variété américaine", image: "assets/variete_americaine.png", style: "variete_americaine" },
+  { nom: "Blues", image: "assets/blues.png", style: "blues" },
+  { nom: "RnB", image: "assets/rnb.png", style: "rnb" },
+  { nom: "Jazz", image: "assets/jazz.png", style: "jazz" },
+  { nom: "Funk", image: "assets/funk.png", style: "funk" },
+  { nom: "Disco", image: "assets/disco.png", style: "disco" }
 ];
+const morceauxParStyle = {
+  reggae: [
+    { nom: "Positif, vibration", image: "assets/positif-vibration.jpg", audio: "audio/positif-vibration.mp3" },
+    { nom: "Punky Reggae Party", image: "assets/punky-reggae-party.jpg", audio: "audio/punky-reggae-party.mp3" },
+    { nom: "Is This Love", image: "assets/is-this-love.jpg", audio: "audio/is-this-love.mp3" },
+    { nom: "War No More Trouble", image: "assets/war-no-more-trouble.jpg", audio: "audio/war-no-more-trouble.mp3" }
+  ],
+  jazz: [
+    { nom: "Michael Bublé", image: "assets/michael bubble.png", audio: "audio/michael bublé.mp3" },
+    { nom: "Ray Charles", image: "assets/ray charles.png", audio: "audio/ray charles.mp3" },
+    { nom: "Nat King Cole", image: "assets/nat king cole.png", audio: "audio/nat king cole.mp3" },
+    { nom: "Frank Sinatra", image: "assets/franck sinatra.png", audio: "audio/Frank Sinatra.mp3" }
+  ],
+  rock: [
+    { nom: "elvis", image: "assets/elvis.png", audio: "audio/elvis.mp3" },
+    { nom: "dion", image: "assets/dion.png", audio: "audio/dion.mp3" },
+    { nom: "little richard", image: "assets/little richard.png", audio: "audio/little richard.mp3" },
+    { nom: "Chuck Berry", image: "assets/Chuck Berry.png", audio: "audio/Chuck Berry.mp3" }
+  ]
+};
+let musicLibrary = musicStyles;
+let musicEtape = "styles";
+let musicStyleSelectionne = null;
 
 function estCommandeBibliothequeMusicale(phrase) {
   const q = retirerSophia(phrase || "");
@@ -1169,8 +1206,27 @@ function rendreCarrouselMusique() {
   positionnerCarrouselMusique();
 }
 
+/* Fondu doux entre le carrousel des styles et celui des morceaux. */
+function transitionFonduCarrouselMusique(action) {
+  if (!musicScene || typeof action !== "function") {
+    if (typeof action === "function") action();
+    return;
+  }
+
+  musicScene.classList.add("fondu");
+  setTimeout(() => {
+    action();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => musicScene.classList.remove("fondu"));
+    });
+  }, 350);
+}
+
 function demarrerCarrouselMusique() {
-  arreterCarrouselMusique(false);
+  if (musicCarouselTimer) { clearInterval(musicCarouselTimer); musicCarouselTimer = null; }
+  musicLibrary = musicStyles;
+  musicEtape = "styles";
+  musicStyleSelectionne = null;
   musicCarouselActif = true;
   musicSelection = null;
   musicCarouselIndex = 0;
@@ -1181,7 +1237,7 @@ function demarrerCarrouselMusique() {
     musicCommandes.classList.add("actif");
     musicCommandes.setAttribute("aria-hidden", "false");
   }
-  musicControle.textContent = "Dites « stop » pour écouter le morceau affiché";
+  musicControle.textContent = "Les styles défilent : dites « OK » pour choisir un style";
   rendreCarrouselMusique();
   musicCarouselTimer = setInterval(() => {
     if (!musicCarouselActif) return;
@@ -1202,34 +1258,153 @@ function demarrerCarrouselMusique() {
 
 function arreterCarrouselMusique(jouerMorceau = true) {
   if (!musicCarouselActif) return false;
-
   musicCarouselActif = false;
+  if (musicCarouselTimer) { clearInterval(musicCarouselTimer); musicCarouselTimer = null; }
 
+  const indexSelection = Math.max(0, Math.min(musicCarouselIndex, musicLibrary.length - 1));
+  const selection = musicLibrary[indexSelection];
+  if (!selection) return false;
+
+  if (musicEtape === "styles") {
+    musicStyleSelectionne = selection;
+    musicEtape = "morceaux";
+    // Ignore the duplicate final recognition result for the same "OK".
+    // The user can say "OK" again once the song carousel is moving.
+    verrouSelectionMusiqueJusqua = Date.now() + 1200;
+    musicLibrary = morceauxParStyle[selection.style] || [];
+    musicCarouselIndex = 0;
+    musicSelection = null;
+
+    if (musicLibrary.length === 0) {
+      musicLibrary = [{ nom: "Morceaux à ajouter", image: selection.image, audio: "" }];
+      musicControle.textContent = "Style choisi : " + selection.nom + " — les morceaux seront ajoutés ensuite.";
+    } else {
+      musicControle.textContent = "Style : " + selection.nom + " — dites « OK » pour écouter le morceau affiché";
+    }
+
+    /* Le premier « OK » choisit uniquement le style : aucun MP3 ne démarre ici. */
+    transitionFonduCarrouselMusique(() => {
+      rendreCarrouselMusique();
+      musicCarouselActif = true;
+      musicCarouselTimer = setInterval(() => {
+        if (!musicCarouselActif) return;
+        musicCarouselIndex = (musicCarouselIndex + 1) % musicLibrary.length;
+        positionnerCarrouselMusique();
+      }, 1200);
+    });
+    etat.textContent = "🎵 Style choisi : " + selection.nom + ". Dites « OK » pour lancer un morceau.";
+    return true;
+  }
+
+  musicSelection = selection;
+  positionnerCarrouselMusique();
+  musicControle.textContent = "✓ " + musicSelection.nom;
+  if (jouerMorceau && musicSelection.audio) {
+    verrouSelectionMusiqueJusqua = Date.now() + 2800;
+    jouerMusiqueCarrousel(musicSelection);
+  } else {
+    etat.textContent = "🎵 " + musicSelection.nom + " sélectionné. Aucun MP3 n'a été lancé.";
+  }
+  return true;
+}
+
+function relancerCarrouselMusique() {
   if (musicCarouselTimer) {
     clearInterval(musicCarouselTimer);
     musicCarouselTimer = null;
   }
 
-  const indexSelection = Math.max(
-    0,
-    Math.min(musicCarouselIndex, musicLibrary.length - 1)
-  );
-  musicSelection = musicLibrary[indexSelection];
-
-  positionnerCarrouselMusique();
-
-  if (!musicSelection) return false;
-
-  musicControle.textContent = "✓ " + musicSelection.nom;
-
-  if (jouerMorceau) {
-    /* Verrouille les prochains « stop » (souvent le résultat final
-       de la même utterance) pour ne pas couper le MP3 qui démarre. */
-    verrouSelectionMusiqueJusqua = Date.now() + 2800;
-    jouerMusiqueCarrousel(musicSelection);
+  // Si le carrousel était fermé, « relance » le rouvre sur le choix des styles.
+  if (!musicCarousel.classList.contains("actif")) {
+    musicLibrary = musicStyles;
+    musicEtape = "styles";
+    musicStyleSelectionne = null;
+    musicSelection = null;
+    musicCarouselIndex = 0;
   }
 
-  return true;
+  musicCarousel.classList.add("actif");
+  musicCarousel.setAttribute("aria-hidden", "false");
+  if (musicCommandes) {
+    musicCommandes.classList.add("actif");
+    musicCommandes.setAttribute("aria-hidden", "false");
+  }
+
+  rendreCarrouselMusique();
+  musicCarouselActif = true;
+  musicCarouselTimer = setInterval(() => {
+    if (!musicCarouselActif) return;
+    musicCarouselIndex = (musicCarouselIndex + 1) % musicLibrary.length;
+    positionnerCarrouselMusique();
+  }, 1200);
+
+  musicControle.textContent = musicEtape === "styles"
+    ? "Dites « OK » pour choisir le style affiché"
+    : "Style : " + (musicStyleSelectionne ? musicStyleSelectionne.nom : "sélectionné") + " — dites « OK » pour écouter le morceau affiché";
+  etat.textContent = musicEtape === "styles"
+    ? "🎵 Les styles défilent. Dites « OK » pour choisir."
+    : "🎵 Les morceaux défilent. Dites « OK » pour lancer le morceau affiché.";
+}
+
+function retourAuxStylesMusicaux() {
+  if (musicCarouselTimer) { clearInterval(musicCarouselTimer); musicCarouselTimer = null; }
+
+  // If a song is playing, stop it before returning to the music-style library.
+  if (musiqueEnCours || audioLectureEnCours) {
+    if (typeof stopMusiqueEtRetourEcoute === "function") {
+      stopMusiqueEtRetourEcoute();
+    } else if (lecteurAudio) {
+      lecteurAudio.pause();
+      lecteurAudio.currentTime = 0;
+      musiqueEnCours = false;
+      audioLectureEnCours = false;
+    }
+  }
+
+  musicCarouselActif = false;
+  musicEtape = "styles";
+  musicStyleSelectionne = null;
+  musicSelection = null;
+  musicLibrary = musicStyles;
+  musicCarouselIndex = 0;
+  musicCarousel.classList.add("actif");
+  musicCarousel.setAttribute("aria-hidden", "false");
+  if (musicCommandes) {
+    musicCommandes.classList.add("actif");
+    musicCommandes.setAttribute("aria-hidden", "false");
+  }
+  musicControle.textContent = "Les styles défilent : dites « OK » pour choisir un style";
+  transitionFonduCarrouselMusique(() => {
+    rendreCarrouselMusique();
+    musicCarouselActif = true;
+    musicCarouselTimer = setInterval(() => {
+      if (!musicCarouselActif) return;
+      musicCarouselIndex = (musicCarouselIndex + 1) % musicLibrary.length;
+      positionnerCarrouselMusique();
+    }, 1200);
+  });
+  etat.textContent = "🎵 Choisissez un style. Dites « OK » pour le sélectionner.";
+}
+
+function estCommandeRetourStyles(phrase) {
+  const q = retirerSophia(phrase || "");
+  return (
+    q.includes("retour au style") ||
+    q.includes("retour du style") ||
+    q.includes("retour aux styles") ||
+    q.includes("retour styles") ||
+    q.includes("revenir au style") ||
+    q.includes("revenir aux styles") ||
+    q.includes("retour au choix du style") ||
+    q.includes("revenir au choix du style") ||
+    q.includes("retour au carrousel des styles") ||
+    q.includes("retour au carrousel musical") ||
+    q.includes("changer de style") ||
+    q.includes("choisir un autre style") ||
+    q.includes("styles precedents") ||
+    q.includes("carousel precedent") ||
+    q.includes("carrousel precedent")
+  );
 }
 
 /*
@@ -1376,7 +1551,6 @@ function fermerCarrouselMusique() {
 ========================================================= */
 
 let connaissances = null;
-let chargementConnaissances = null;
 let reconnaissance = null;
 let reconnaissanceActive = false;
 
@@ -1614,36 +1788,41 @@ function signalerInteraction() {
 
 async function chargerConnaissances() {
 
-  // Un seul chargement partagé : évite qu'une question arrive
-  // avant la fin du fetch, notamment sur une tablette plus lente.
-  if (connaissances) return connaissances;
-  if (chargementConnaissances) return chargementConnaissances;
+  try {
 
-  chargementConnaissances = (async () => {
-    try {
-      const reponse = await fetch("connaissances.json?cache=" + Date.now());
+    const reponse = await fetch(
+      "./connaissances.json?cache=" + Date.now(),
+      { cache: "no-store" }
+    );
 
-      if (!reponse.ok) {
-        throw new Error("Impossible de charger connaissances.json (HTTP " + reponse.status + ")");
-      }
-
-      const base = await reponse.json();
-      if (!base || !Array.isArray(base.reponses)) {
-        throw new Error("Le fichier connaissances.json n'a pas le format attendu.");
-      }
-
-      connaissances = base;
-      console.log("✅ Base de connaissances chargée :", connaissances.reponses.length, "réponses");
-      return connaissances;
-    } catch (erreur) {
-      console.error("❌ Erreur connaissances.json :", erreur);
-      etat.textContent = "⚠️ Base de connaissances indisponible. Vérifiez que connaissances.json est bien publié à côté de index.html.";
-      chargementConnaissances = null;
-      return null;
+    if (!reponse.ok) {
+      throw new Error(
+        "Impossible de charger ./connaissances.json (HTTP " + reponse.status + ")"
+      );
     }
-  })();
 
-  return chargementConnaissances;
+    const baseChargee = await reponse.json();
+    if (!baseChargee || !Array.isArray(baseChargee.reponses)) {
+      throw new Error(
+        "Le fichier connaissances.json ne contient pas de tableau 'reponses'."
+      );
+    }
+
+    connaissances = baseChargee;
+    console.log(
+      "✅ Base de connaissances chargée : " + connaissances.reponses.length + " réponses"
+    );
+
+  } catch (erreur) {
+
+    console.error(
+      "❌ Erreur connaissances.json :",
+      erreur
+    );
+
+    etat.textContent =
+      "⚠️ Impossible de charger les connaissances.";
+  }
 }
 
 
@@ -1725,6 +1904,13 @@ function retirerSophia(phrase) {
    STOP CARROUSEL
 ========================================================= */
 
+function estCommandeStopCarrouselMusical(phrase) {
+  const q = retirerSophia(phrase);
+  return estCommandeStopCarrousel(phrase) ||
+    q === "top" || q.startsWith("top ") ||
+    q === "ok" || q.startsWith("ok ");
+}
+
 function estCommandeStopCarrousel(phrase) {
 
   const q =
@@ -1774,17 +1960,20 @@ function estCommandeStopCarrousel(phrase) {
 
 
 function estCommandeRelanceCarrousel(phrase) {
-
-  const q = retirerSophia(phrase);
-
+  const q = retirerSophia(phrase || "");
   return (
     q === "relance" ||
     q === "relancer" ||
     q === "relance le carrousel" ||
     q === "relancer le carrousel" ||
+    q === "relance le carousel" ||
+    q === "relancer le carousel" ||
     q === "reprend le carrousel" ||
     q === "reprendre le carrousel" ||
-    q === "reprends le carrousel"
+    q === "reprends le carrousel" ||
+    q === "reprends le carousel" ||
+    q === "relance la bibliotheque musicale" ||
+    q === "relance le carrousel musical"
   );
 }
 
@@ -1831,9 +2020,15 @@ function estCommandeStop(phrase) {
     "stop ca"
   ];
 
-  return commandesStop.some(
-    commande =>
-      q === normaliser(commande)
+  const qNormalisee = normaliser(q);
+  if (commandesStop.some(commande => qNormalisee === normaliser(commande))) {
+    return true;
+  }
+
+  /* La reconnaissance vocale peut ajouter des mots avant/après la commande. */
+  return (
+    /\\b(arr[eê]te|arrete|stoppe?|arr[eê]t)\\b.*\\b(la )?musique\\b/.test(qNormalisee) ||
+    /\\b(stop|arr[eê]te|arrete)\\b.*\\b(morceau|chanson)\\b/.test(qNormalisee)
   );
 }
 
@@ -1860,7 +2055,13 @@ function trouverMusique(question) {
       r => r.id === "redemption_song"
     );
   }
-
+  // Le titre est testé avant les mots-clés génériques pour éviter
+  // qu'une commande musicale soit envoyée vers la réponse par défaut.
+  if (q.includes("little one")) {
+    return connaissances.reponses.find(
+      r => r.id === "little_one"
+    ) || null;
+  }
   const parleDeBobMarley =
     q.includes("bob marley") ||
     q.includes("bob") ||
@@ -4566,8 +4767,24 @@ if (SpeechRecognition) {
       if (commandeMusicaleEntendue) {
         const maintenant = Date.now();
 
-        /* 1) Arrêt du carrousel musical → lance le MP3 affiché */
-        if (musicCarouselActif && estCommandeStopCarrousel(commandeMusicaleEntendue)) {
+        if (musicCarousel.classList.contains("actif") && musicEtape === "morceaux" &&
+            estCommandeRetourStyles(commandeMusicaleEntendue)) {
+          retourAuxStylesMusicaux();
+          traitementQuestion = false;
+          conversationActive = true;
+          return;
+        }
+
+        /* Priorité absolue à l'arrêt vocal quand un MP3 est en lecture. */
+        if (audioLectureEnCours && musiqueEnCours && estCommandeStop(commandeMusicaleEntendue)) {
+          console.log("🛑 Arrêt vocal immédiat de la musique :", commandeMusicaleEntendue);
+          verrouSelectionMusiqueJusqua = 0;
+          stopMusiqueEtRetourEcoute();
+          return;
+        }
+
+        /* 1) « OK » sélectionne le style ; le deuxième « OK » lance le morceau */
+        if (musicCarouselActif && estCommandeStopCarrouselMusical(commandeMusicaleEntendue)) {
           if (maintenant < verrouSelectionMusiqueJusqua) {
             return;
           }
@@ -4737,6 +4954,14 @@ if (SpeechRecognition) {
 
       /* COMMANDES DU CARROUSEL MUSICAL */
 
+      if (musicCarousel && musicCarousel.classList.contains("actif") &&
+          musicEtape === "morceaux" && estCommandeRetourStyles(resultat)) {
+        retourAuxStylesMusicaux();
+        traitementQuestion = false;
+        conversationActive = true;
+        return;
+      }
+
       if (
         musicCarousel &&
         musicCarousel.classList.contains("actif") &&
@@ -4752,13 +4977,11 @@ if (SpeechRecognition) {
 
       if (
         musicCarousel &&
-        musicCarousel.classList.contains("actif") &&
         estCommandeRelanceCarrousel(resultat)
       ) {
-        demarrerCarrouselMusique();
+        relancerCarrouselMusique();
         traitementQuestion = false;
         conversationActive = true;
-        etat.textContent = "🎵 Les morceaux défilent... Dites « stop » pour écouter.";
         return;
       }
 
@@ -5228,18 +5451,16 @@ async function traiterQuestion(
   source = "jaune"
 ) {
 
-  if (traitementQuestion || audioLectureEnCours) {
-    return;
+  // Sur certains appareils, la reconnaissance vocale peut répondre très vite
+  // après le chargement de la page : attendre la base avant de chercher.
+  if (!connaissances || !Array.isArray(connaissances.reponses)) {
+    await chargerConnaissances();
   }
 
-  // Attendre le chargement réel de la base avant toute recherche.
-  if (!connaissances) {
-    etat.textContent = "⏳ Chargement des réponses de Sophia...";
-    const baseChargee = await chargerConnaissances();
-    if (!baseChargee) {
-      etat.textContent = "⚠️ Je ne peux pas rechercher la réponse : vérifiez le fichier connaissances.json sur GitHub.";
-      return;
-    }
+  if (!connaissances || !Array.isArray(connaissances.reponses)) {
+    etat.textContent = "⚠️ La base de connaissances n'est pas disponible. Vérifiez connaissances.json.";
+    traitementQuestion = false;
+    return;
   }
 
   if (traitementQuestion || audioLectureEnCours) {
@@ -5594,11 +5815,16 @@ async function traiterQuestion(
 
   if (cheminImage) {
 
-    imageSupplementaire.src =
-      cheminImage;
-
-    imageSupplementaire.style.display =
-      "block";
+    imageSupplementaire.onerror = () => {
+      console.warn("Image associée introuvable :", cheminImage);
+      imageSupplementaire.style.display = "none";
+      imageSupplementaire.removeAttribute("src");
+    };
+    imageSupplementaire.onload = () => {
+      imageSupplementaire.style.display = "block";
+    };
+    imageSupplementaire.src = cheminImage;
+    imageSupplementaire.style.display = "block";
   }
 
 
@@ -6058,7 +6284,7 @@ boutonRelanceMusique.addEventListener("click", event => {
   demarrerCarrouselMusique();
   traitementQuestion = false;
   conversationActive = true;
-  etat.textContent = "🎵 Les morceaux défilent... Dites « stop » pour écouter.";
+  etat.textContent = musicEtape === "styles" ? "🎵 Les styles défilent... Dites « OK » pour choisir." : "🎵 Les morceaux défilent... Dites « stop » pour choisir un morceau.";
 });
 
 boutonStopMusique.addEventListener("click", event => {
@@ -6241,6 +6467,7 @@ servicesCommandes.setAttribute(
 );
 
 rendreCarrouselServices();
+rendreCarrouselMusique();
 
 chargerConnaissances();
 
