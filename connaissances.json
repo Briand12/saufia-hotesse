@@ -632,6 +632,21 @@
       "texte_lecture": "🎵 Redemption Song — Bob Marley"
     },
     {
+      "id": "little_one",
+      "question": "Little One",
+      "categorie": "musique",
+      "type": "musique",
+      "mots_cles": [
+        "little one",
+        "joue little one",
+        "mets little one",
+        "little one little bryan"
+      ],
+      "audio": "audio/little one.mp3",
+      "image": "assets/little_one.png",
+      "texte_lecture": "🎵 Little One — little bryan"
+    },
+    {
       "id": "remerciement",
       "question": "Merci pour tous ces renseignements",
       "categorie": "accueil",
@@ -651,6 +666,112 @@
         "je vous remercie beaucoup"
       ],
       "video": "videos/remerciement.mp4"
+    },
+    {
+      "id": "anglais",
+      "question": "Parler anglais",
+      "categorie": "langues",
+      "mots_cles": [
+        "anglais",
+        "english",
+        "parler anglais",
+        "parle anglais",
+        "langue anglaise",
+        "parler en anglais",
+        "présentation en anglais",
+        "presentation en anglais"
+      ],
+      "video": "videos/anglais.mp4"
+    },
+    {
+      "id": "allemand",
+      "question": "Parler allemand",
+      "categorie": "langues",
+      "mots_cles": [
+        "allemand",
+        "deutsch",
+        "parler allemand",
+        "parle allemand",
+        "langue allemande",
+        "parler en allemand",
+        "présentation en allemand",
+        "presentation en allemand"
+      ],
+      "video": "videos/allemand.mp4"
+    },
+    {
+      "id": "michael_buble_jazz",
+      "question": "Michael Bublé",
+      "categorie": "musique",
+      "type": "musique",
+      "mots_cles": [
+        "michael buble",
+        "michael bublé",
+        "michael bubble",
+        "joue michael buble",
+        "joue-moi michael bublé",
+        "musique michael buble",
+        "jazz michael buble",
+        "buble jazz",
+        "bublé jazz"
+      ],
+      "audio": "audio/michael bublé.mp3",
+      "image": "assets/michael bubble.png",
+      "texte_lecture": "🎵 Michael Bublé — Jazz"
+    },
+    {
+      "id": "ray_charles_jazz",
+      "question": "Ray Charles",
+      "categorie": "musique",
+      "type": "musique",
+      "mots_cles": [
+        "ray charles",
+        "joue ray charles",
+        "joue-moi ray charles",
+        "musique ray charles",
+        "jazz ray charles",
+        "ray charles jazz"
+      ],
+      "audio": "audio/ray charles.mp3",
+      "image": "assets/ray charles.png",
+      "texte_lecture": "🎵 Ray Charles — Jazz"
+    },
+    {
+      "id": "nat_king_cole_jazz",
+      "question": "Nat King Cole",
+      "categorie": "musique",
+      "type": "musique",
+      "mots_cles": [
+        "nat king cole",
+        "nat king",
+        "joue nat king cole",
+        "joue-moi nat king cole",
+        "musique nat king cole",
+        "jazz nat king cole",
+        "nat king cole jazz"
+      ],
+      "audio": "audio/nat king cole.mp3",
+      "image": "assets/nat king cole.png",
+      "texte_lecture": "🎵 Nat King Cole — Jazz"
+    },
+    {
+      "id": "frank_sinatra_jazz",
+      "question": "Frank Sinatra",
+      "categorie": "musique",
+      "type": "musique",
+      "mots_cles": [
+        "frank sinatra",
+        "franck sinatra",
+        "joue frank sinatra",
+        "joue-moi frank sinatra",
+        "musique frank sinatra",
+        "jazz frank sinatra",
+        "frank sinatra jazz",
+        "franck sinatra jazz"
+      ],
+      "audio": "audio/Frank Sinatra.mp3",
+      "image": "assets/franck sinatra.png",
+      "texte_lecture": "🎵 Frank Sinatra — Jazz"
     },
     {
       "id": "reponse_par_defaut",
